@@ -7,9 +7,13 @@ const PORT = process.env.PORT || 5000;
 
 const app: Application = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? "https://chess-clock-trivia.herokuapp.com"
+        : "http://localhost:3000",
     credentials: true,
   },
 });

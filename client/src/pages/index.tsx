@@ -5,7 +5,9 @@ const Home: React.FC = () => {
   const [response, setResponse] = useState("Connecting...");
 
   useEffect(() => {
-    const socket = socketIOClient("http://localhost:5000");
+    const socket = socketIOClient(
+      process.env.NODE_ENV === "production" ? "/" : "http://localhost:5000"
+    );
     socket.on("connect", () => {
       setResponse("CONNECTED!");
     });
