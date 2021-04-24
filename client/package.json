@@ -15,7 +15,8 @@
     "react-dom": "17.0.1",
     "react-ga": "^3.3.0",
     "react-router-dom": "^5.2.0",
-    "sass": "^1.32.8"
+    "sass": "^1.32.8",
+    "socket.io-client": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^14.14.22",

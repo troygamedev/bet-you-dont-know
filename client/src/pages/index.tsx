@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
+import socketIOClient from "socket.io-client";
 
 const Home: React.FC = () => {
-  const [state, setState] = useState();
+  const [response, setResponse] = useState("Connecting...");
+
   useEffect(() => {
-    const fetchAPI = async () => {
-      const response = await fetch("/api");
-      const json = await response.json();
-      setState(json.message);
-    };
-    fetchAPI();
+    const socket = socketIOClient("http://localhost:5000");
+    socket.on("connect", () => {
+      setResponse("CONNECTED!");
+    });
   }, []);
 
-  return <div>{state}</div>;
+  return <div>{response}</div>;
 };
 
 export default Home;

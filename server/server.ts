@@ -1,9 +1,18 @@
-const express = require("express");
-
-const app = express();
-const cors = require("cors");
+import express, { Application } from "express";
+import http from "http";
+import { Server, Socket } from "socket.io";
+import path from "path";
+import cors from "cors";
 const PORT = process.env.PORT || 5000;
-const path = require("path");
+
+const app: Application = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    credentials: true,
+  },
+});
 
 //force https
 if (process.env.NODE_ENV === "production") {
@@ -26,11 +35,18 @@ app.use(
   })
 );
 
-//Routes//
-app.get("/api", (req, res) => {
-  res.json({ message: "hola" });
+// //Routes//
+// app.get("/api", (req, res) => {
+//   res.json({ message: "hola" });
+// });
+
+// on connect
+io.on("connection", (socket: Socket) => {
+  socket.on("connect", () => {
+    io.emit("connect", { message: "lets go" });
+  });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`server has started on port ${PORT}`);
 });
