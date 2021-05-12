@@ -9,3 +9,7 @@ export interface Lobby {
   id: number;
   users: Array<User>;
 }
+
+export interface GameData {
+  isInLobby: boolean;
+}
