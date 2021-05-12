@@ -3,7 +3,7 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
-import { Lobby } from "@shared/types";
+import { Lobby, User } from "@shared/types";
 const PORT = process.env.PORT || 5000;
 
 const app: Application = express();
@@ -48,7 +48,8 @@ app.use(
 const NUM_LOBBIES = 5;
 let lobbies: Array<Lobby> = [];
 for (let i = 0; i < NUM_LOBBIES; i++) {
-  lobbies.push({ id: i, name: "Lobby Room " + i });
+  let users: Array<User> = [];
+  lobbies.push({ id: i, name: "Lobby Room " + i, users: users });
 }
 
 // on connect
@@ -63,15 +64,40 @@ io.on("connection", (socket: Socket) => {
   // io.emit("message", "hello")
 
   socket.emit("message", "connected!");
-  socket.emit("lobbies", lobbies);
+  socket.emit("loadLobbies", lobbies);
 
-  socket.on("joinLobby", (lobby: Lobby) => {
-    console.log("join join caught");
-    socket.emit("message", "You have joined " + lobby.name);
+  socket.on("joinLobby", (lobbyID: number) => {
+    socket.emit("lobbyJoined", lobbies[lobbyID]);
+
+    const newUser: User = {
+      username: "User" + lobbies[lobbyID].users.length,
+      lobbyID: lobbies[lobbyID].id,
+      socketID: socket.id,
+    };
+    lobbies[lobbyID].users.push(newUser);
+    socket.emit(
+      "message",
+      "Welcome, " +
+        newUser.username +
+        ", you have joined " +
+        lobbies[lobbyID].name
+    );
+
+    // refresh everyone's lobbies
+    io.emit("loadLobbies", lobbies);
   });
 
   socket.on("disconnect", () => {
-    console.log("DISCONNECTED");
+    // search through lobbies for this user
+    lobbies.forEach((lobby) => {
+      lobby.users.forEach((user, idx) => {
+        // remove the user from lobby if the socket id matches
+        if (user.socketID == socket.id) {
+          lobby.users.splice(idx, idx + 1);
+          io.emit("loadLobbies", lobbies);
+        }
+      });
+    });
   });
 });
 
