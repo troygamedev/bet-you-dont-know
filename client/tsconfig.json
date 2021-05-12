@@ -19,7 +19,9 @@
       "@components/*": ["src/components/*"],
       "@styles/*": ["public/styles/*"],
       "@hooks/*": ["src/hooks/*"],
-      "@imgs/*": ["https://localhost:3000/public/imgs/*"]
+      "@imgs/*": ["https://localhost:3000/public/imgs/*"],
+      "@shared/*": ["../shared/*"],
+      "@context/*": ["src/context/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

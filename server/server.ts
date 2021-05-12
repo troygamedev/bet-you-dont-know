@@ -3,6 +3,7 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
+import { Lobby } from "@shared/types";
 const PORT = process.env.PORT || 5000;
 
 const app: Application = express();
@@ -44,10 +45,33 @@ app.use(
 //   res.json({ message: "hola" });
 // });
 
+const NUM_LOBBIES = 5;
+let lobbies: Array<Lobby> = [];
+for (let i = 0; i < NUM_LOBBIES; i++) {
+  lobbies.push({ id: i, name: "Lobby Room " + i });
+}
+
 // on connect
 io.on("connection", (socket: Socket) => {
-  socket.on("connect", () => {
-    io.emit("connect", { message: "lets go" });
+  // to just this client
+  // socket.emit("message", "hello")
+
+  // to everyone but the client
+  // socket.broadcast.emit("message", "hello");
+
+  // to everyone
+  // io.emit("message", "hello")
+
+  socket.emit("message", "connected!");
+  socket.emit("lobbies", lobbies);
+
+  socket.on("joinLobby", (lobby: Lobby) => {
+    console.log("join join caught");
+    socket.emit("message", "You have joined " + lobby.name);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("DISCONNECTED");
   });
 });
 
