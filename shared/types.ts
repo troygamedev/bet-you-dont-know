@@ -4,12 +4,14 @@ export interface User {
   lobbyID: number;
 }
 
+export interface ChatMessage {
+  user: User;
+  message: string;
+}
+
 export interface Lobby {
   name: string;
   id: number;
   users: Array<User>;
-}
-
-export interface GameData {
-  isInLobby: boolean;
+  chatMessages: Array<ChatMessage>;
 }

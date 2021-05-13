@@ -7,9 +7,6 @@ import Footer from "@components/Footer/Footer";
 import Header from "@components/Header/Header";
 import Game from "@components/Game/Game";
 import LobbyList from "@components/LobbyList/LobbyList";
-import GameContext from "@context/GameContext";
-
-import { GameData } from "@shared/types";
 
 const SOCKET_URL =
   process.env.NODE_ENV === "production" ? "/" : "http://localhost:5000";
@@ -17,14 +14,12 @@ const SOCKET_URL =
 const socket = io(SOCKET_URL);
 
 const Home: React.FC = () => {
-  const [messageBox, setMessageBox] = useState<string>("Loading...");
   useEffect(() => {
-    socket.on("message", (message: string) => {
-      setMessageBox(message);
-      console.log(message);
+    socket.on("lobbyJoined", () => {
+      setHasJoinedLobby(true);
     });
   }, []);
-  const [gameData, setGameData] = useState<GameData>({ isInLobby: false });
+  const [hasJoinedLobby, setHasJoinedLobby] = useState(false);
   return (
     <div>
       <Head>
@@ -32,11 +27,7 @@ const Home: React.FC = () => {
       </Head>
       <Header />
       <SocketContext.Provider value={socket}>
-        <GameContext.Provider value={[gameData, setGameData]}>
-          <div>{messageBox}</div>
-          <LobbyList />
-          <Game />
-        </GameContext.Provider>
+        {hasJoinedLobby ? <Game /> : <LobbyList />}
       </SocketContext.Provider>
       <Footer />
     </div>

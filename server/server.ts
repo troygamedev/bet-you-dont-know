@@ -3,7 +3,7 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
-import { Lobby, User } from "@shared/types";
+import { ChatMessage, Lobby, User } from "@shared/types";
 const PORT = process.env.PORT || 5000;
 
 const app: Application = express();
@@ -49,7 +49,13 @@ const NUM_LOBBIES = 5;
 let lobbies: Array<Lobby> = [];
 for (let i = 0; i < NUM_LOBBIES; i++) {
   let users: Array<User> = [];
-  lobbies.push({ id: i, name: "Lobby Room " + i, users: users });
+  let chatMessages: Array<ChatMessage> = [];
+  lobbies.push({
+    id: i,
+    name: "Lobby Room " + i,
+    users: users,
+    chatMessages: chatMessages,
+  });
 }
 
 // on connect
@@ -63,28 +69,31 @@ io.on("connection", (socket: Socket) => {
   // to everyone
   // io.emit("message", "hello")
 
-  socket.emit("message", "connected!");
-  socket.emit("loadLobbies", lobbies);
+  socket.emit("updateLobbyList", lobbies);
 
   socket.on("joinLobby", (lobbyID: number) => {
+    // send event to hide the user's lobby list
     socket.emit("lobbyJoined", lobbies[lobbyID]);
 
+    // create the new user
     const newUser: User = {
       username: "User" + lobbies[lobbyID].users.length,
       lobbyID: lobbies[lobbyID].id,
       socketID: socket.id,
     };
+    // add them to the user list
     lobbies[lobbyID].users.push(newUser);
-    socket.emit(
-      "message",
-      "Welcome, " +
-        newUser.username +
-        ", you have joined " +
-        lobbies[lobbyID].name
-    );
 
-    // refresh everyone's lobbies
-    io.emit("loadLobbies", lobbies);
+    // subscribe them to the corresponding lobby room
+    const lobbyIDToString = lobbies[lobbyID].id.toString();
+    socket.join(lobbyIDToString);
+
+    // update everyone's lobby object with the newest changes
+    socket.to(lobbyIDToString).emit("updateLobby", lobbies[lobbyID]);
+    socket.emit("updateLobby", lobbies[lobbyID]);
+
+    // refresh everyone's lobbies list
+    io.emit("updateLobbyList", lobbies);
   });
 
   socket.on("disconnect", () => {
@@ -94,7 +103,13 @@ io.on("connection", (socket: Socket) => {
         // remove the user from lobby if the socket id matches
         if (user.socketID == socket.id) {
           lobby.users.splice(idx, idx + 1);
-          io.emit("loadLobbies", lobbies);
+
+          const lobbyIDToString = lobby.id.toString();
+
+          socket.to(lobbyIDToString).emit("updateLobby", lobby);
+          socket.leave(lobby.id.toString());
+
+          io.emit("updateLobbyList", lobbies);
         }
       });
     });
