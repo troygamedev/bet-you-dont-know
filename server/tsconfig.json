@@ -5,6 +5,7 @@
     // "rootDir": "./",
     "outDir": "./build",
     "esModuleInterop": true,
+
     "strict": false,
     "lib": ["es6"],
     "types": ["node", "express"],

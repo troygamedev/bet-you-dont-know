@@ -4,6 +4,8 @@ import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
 import { ChatMessage, Lobby, User } from "@shared/types";
+import dayjs from "dayjs";
+
 const PORT = process.env.PORT || 5000;
 
 const app: Application = express();
@@ -88,7 +90,7 @@ io.on("connection", (socket: Socket) => {
     thisLobby.chatMessages.push({
       isServer: true,
       message: newUser.username + " has joined!",
-      timestamp: new Date(),
+      timestamp: dayjs(),
     });
 
     // subscribe them to the corresponding lobby room
@@ -108,7 +110,7 @@ io.on("connection", (socket: Socket) => {
     lobbies[lobbyID].chatMessages.push({
       message: message,
       user: sender,
-      timestamp: new Date(),
+      timestamp: dayjs(),
     });
     // send this to everyone in the room
     socket.to(lobbyIDToString).emit("updateLobby", lobbies[lobbyID]);
@@ -130,7 +132,7 @@ io.on("connection", (socket: Socket) => {
           lobby.chatMessages.push({
             isServer: true,
             message: user.username + " has left the party!",
-            timestamp: new Date(),
+            timestamp: dayjs(),
           });
           // tell everyone in the room to get the newest changes
           socket.to(lobbyIDToString).emit("updateLobby", lobby);

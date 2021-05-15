@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export interface User {
   username: string;
   socketID: string;
@@ -8,7 +10,7 @@ export interface ChatMessage {
   isServer?: boolean;
   user?: User;
   message: string;
-  timestamp: Date;
+  timestamp: dayjs.Dayjs;
 }
 
 export interface Lobby {
