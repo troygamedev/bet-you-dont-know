@@ -72,17 +72,20 @@ io.on("connection", (socket: Socket) => {
   socket.emit("updateLobbyList", lobbies);
 
   socket.on("joinLobby", (lobbyID: number) => {
+    const thisLobby = lobbies[lobbyID];
     // send event to hide the user's lobby list
-    socket.emit("lobbyJoined", lobbies[lobbyID]);
+    socket.emit("lobbyJoined", thisLobby);
 
     // create the new user
     const newUser: User = {
-      username: "User" + lobbies[lobbyID].users.length,
-      lobbyID: lobbies[lobbyID].id,
+      username: "User" + thisLobby.users.length,
+      lobbyID: thisLobby.id,
       socketID: socket.id,
     };
     // add them to the user list
-    lobbies[lobbyID].users.push(newUser);
+    thisLobby.users.push(newUser);
+    //send a chat message
+    thisLobby.chatMessages.push({ user: newUser, message: "I have joined!" });
 
     // subscribe them to the corresponding lobby room
     const lobbyIDToString = lobbies[lobbyID].id.toString();
@@ -96,19 +99,34 @@ io.on("connection", (socket: Socket) => {
     io.emit("updateLobbyList", lobbies);
   });
 
+  socket.on("sendMessage", (lobbyID: number, message: string, sender: User) => {
+    const lobbyIDToString = lobbyID.toString();
+    lobbies[lobbyID].chatMessages.push({ message: message, user: sender });
+    // send this to everyone in the room
+    socket.to(lobbyIDToString).emit("updateLobby", lobbies[lobbyID]);
+    // as well as the sender
+    socket.emit("updateLobby", lobbies[lobbyID]);
+  });
+
   socket.on("disconnect", () => {
     // search through lobbies for this user
     lobbies.forEach((lobby) => {
       lobby.users.forEach((user, idx) => {
-        // remove the user from lobby if the socket id matches
         if (user.socketID == socket.id) {
+          // remove the user from lobby if the socket id matches
           lobby.users.splice(idx, idx + 1);
 
           const lobbyIDToString = lobby.id.toString();
 
+          // send a message that the user has left
+          lobby.chatMessages.push({ user: user, message: "I have left!" });
+          // tell everyone in the room to get the newest changes
           socket.to(lobbyIDToString).emit("updateLobby", lobby);
+
+          // leave the room
           socket.leave(lobby.id.toString());
 
+          // tell everyone to update the lobby list
           io.emit("updateLobbyList", lobbies);
         }
       });

@@ -1,3 +1,4 @@
+import ChatBox from "@components/ChatBox/ChatBox";
 import SocketContext from "@context/SocketContext";
 import { ChatMessage, Lobby, User } from "@shared/types";
 import { useEffect, useState, useContext } from "react";
@@ -14,16 +15,22 @@ const Game: React.FC = () => {
     });
   }, []);
 
+  const me = lobby && lobby.users.find((user) => user.socketID == socket.id);
+
   return (
     <div>
       {lobby && (
         <>
-          <div>{lobby.chatMessages}</div>
+          <ChatBox
+            sender={me}
+            lobbyID={lobby.id}
+            chatList={lobby.chatMessages}
+          />
           <div>
             <h3>Players in Lobby: </h3>
             {lobby.users &&
               lobby.users.map((user, idx) => {
-                if (user.socketID == socket.id) {
+                if (user == me) {
                   return <p key={idx}>{user.username + " (You)"}</p>;
                 }
                 return <p key={idx}>{user.username}</p>;
