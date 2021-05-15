@@ -5,8 +5,10 @@ export interface User {
 }
 
 export interface ChatMessage {
-  user: User;
+  isServer?: boolean;
+  user?: User;
   message: string;
+  timestamp: Date;
 }
 
 export interface Lobby {

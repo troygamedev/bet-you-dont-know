@@ -27,6 +27,13 @@ const ChatBox: React.FC<Props> = (props) => {
   return (
     <div className={styles.container}>
       {props.chatList.map((msg, idx) => {
+        if (msg.isServer) {
+          return (
+            <div key={idx}>
+              <strong>{msg.message}</strong>
+            </div>
+          );
+        }
         return <div key={idx}>{msg.user.username + ": " + msg.message}</div>;
       })}
       <div>

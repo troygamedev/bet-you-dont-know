@@ -85,7 +85,11 @@ io.on("connection", (socket: Socket) => {
     // add them to the user list
     thisLobby.users.push(newUser);
     //send a chat message
-    thisLobby.chatMessages.push({ user: newUser, message: "I have joined!" });
+    thisLobby.chatMessages.push({
+      isServer: true,
+      message: newUser.username + " has joined!",
+      timestamp: new Date(),
+    });
 
     // subscribe them to the corresponding lobby room
     const lobbyIDToString = lobbies[lobbyID].id.toString();
@@ -101,7 +105,11 @@ io.on("connection", (socket: Socket) => {
 
   socket.on("sendMessage", (lobbyID: number, message: string, sender: User) => {
     const lobbyIDToString = lobbyID.toString();
-    lobbies[lobbyID].chatMessages.push({ message: message, user: sender });
+    lobbies[lobbyID].chatMessages.push({
+      message: message,
+      user: sender,
+      timestamp: new Date(),
+    });
     // send this to everyone in the room
     socket.to(lobbyIDToString).emit("updateLobby", lobbies[lobbyID]);
     // as well as the sender
@@ -119,7 +127,11 @@ io.on("connection", (socket: Socket) => {
           const lobbyIDToString = lobby.id.toString();
 
           // send a message that the user has left
-          lobby.chatMessages.push({ user: user, message: "I have left!" });
+          lobby.chatMessages.push({
+            isServer: true,
+            message: user.username + " has left the party!",
+            timestamp: new Date(),
+          });
           // tell everyone in the room to get the newest changes
           socket.to(lobbyIDToString).emit("updateLobby", lobby);
 
