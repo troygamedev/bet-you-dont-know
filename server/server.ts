@@ -74,6 +74,16 @@ io.on("connection", (socket: Socket) => {
   socket.emit("updateLobbyList", lobbies);
 
   const MAX_CHAT_MESSAGES = 20;
+  const sendMessage = (lobbyID: number, msg: ChatMessage) => {
+    const thisLobby = lobbies[lobbyID];
+    //send a chat message
+    thisLobby.chatMessages.push(msg);
+
+    // make sure the number of chat messages don't exceed the limit
+    if (thisLobby.chatMessages.length > MAX_CHAT_MESSAGES) {
+      thisLobby.chatMessages.shift();
+    }
+  };
 
   socket.on("joinLobby", (lobbyID: number) => {
     const thisLobby = lobbies[lobbyID];
@@ -88,16 +98,13 @@ io.on("connection", (socket: Socket) => {
     };
     // add them to the user list
     thisLobby.users.push(newUser);
-    //send a chat message
-    thisLobby.chatMessages.push({
-      isServer: true,
-      message: newUser.username + " has joined!",
+
+    // send a server message
+    sendMessage(lobbyID, {
+      message: newUser.username + " has joined the lobby!",
       timestamp: dayjs(),
+      isServer: true,
     });
-    // make sure the number of chat messages don't exceed the limit
-    if (thisLobby.chatMessages.length > MAX_CHAT_MESSAGES) {
-      thisLobby.chatMessages.shift();
-    }
 
     // subscribe them to the corresponding lobby room
     const lobbyIDToString = lobbies[lobbyID].id.toString();
@@ -113,16 +120,13 @@ io.on("connection", (socket: Socket) => {
 
   socket.on("sendMessage", (lobbyID: number, message: string, sender: User) => {
     const lobbyIDToString = lobbyID.toString();
-    lobbies[lobbyID].chatMessages.push({
-      message: message,
-      user: sender,
-      timestamp: dayjs(),
-    });
-    // make sure the number of chat messages don't exceed the limit
-    if (lobbies[lobbyID].chatMessages.length > MAX_CHAT_MESSAGES) {
-      lobbies[lobbyID].chatMessages.shift();
-    }
 
+    sendMessage(lobbyID, {
+      message: message,
+      timestamp: dayjs(),
+      isServer: false,
+      user: sender,
+    });
     // send this to everyone in the room
     socket.to(lobbyIDToString).emit("updateLobby", lobbies[lobbyID]);
     // as well as the sender
@@ -139,11 +143,11 @@ io.on("connection", (socket: Socket) => {
 
           const lobbyIDToString = lobby.id.toString();
 
-          // send a message that the user has left
-          lobby.chatMessages.push({
-            isServer: true,
-            message: user.username + " has left the party!",
+          // send a server message that someone has left
+          sendMessage(lobby.id, {
+            message: user.username + " has joined the lobby!",
             timestamp: dayjs(),
+            isServer: true,
           });
           // tell everyone in the room to get the newest changes
           socket.to(lobbyIDToString).emit("updateLobby", lobby);
