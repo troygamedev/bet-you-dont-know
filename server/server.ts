@@ -73,6 +73,8 @@ io.on("connection", (socket: Socket) => {
 
   socket.emit("updateLobbyList", lobbies);
 
+  const MAX_CHAT_MESSAGES = 20;
+
   socket.on("joinLobby", (lobbyID: number) => {
     const thisLobby = lobbies[lobbyID];
     // send event to hide the user's lobby list
@@ -92,6 +94,10 @@ io.on("connection", (socket: Socket) => {
       message: newUser.username + " has joined!",
       timestamp: dayjs(),
     });
+    // make sure the number of chat messages don't exceed the limit
+    if (thisLobby.chatMessages.length > MAX_CHAT_MESSAGES) {
+      thisLobby.chatMessages.shift();
+    }
 
     // subscribe them to the corresponding lobby room
     const lobbyIDToString = lobbies[lobbyID].id.toString();
@@ -112,6 +118,11 @@ io.on("connection", (socket: Socket) => {
       user: sender,
       timestamp: dayjs(),
     });
+    // make sure the number of chat messages don't exceed the limit
+    if (lobbies[lobbyID].chatMessages.length > MAX_CHAT_MESSAGES) {
+      lobbies[lobbyID].chatMessages.shift();
+    }
+
     // send this to everyone in the room
     socket.to(lobbyIDToString).emit("updateLobby", lobbies[lobbyID]);
     // as well as the sender
