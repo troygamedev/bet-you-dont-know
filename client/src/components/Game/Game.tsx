@@ -1,4 +1,5 @@
 import ChatBox from "@components/ChatBox/ChatBox";
+import Layout from "@components/Layout/Layout";
 import SocketContext from "@context/SocketContext";
 import { ChatMessage, Lobby, User } from "@shared/types";
 import { useEffect, useState, useContext } from "react";
@@ -18,7 +19,7 @@ const Game: React.FC = () => {
   const me = lobby && lobby.users.find((user) => user.socketID == socket.id);
 
   return (
-    <div>
+    <Layout title={lobby && lobby.name}>
       {lobby && (
         <>
           <ChatBox
@@ -43,7 +44,7 @@ const Game: React.FC = () => {
           )}
         </>
       )}
-    </div>
+    </Layout>
   );
 };
 

@@ -11,6 +11,7 @@ const Lobby: React.FC = () => {
   useEffect(() => {
     socket.emit("joinLobby", slug);
   }, [slug]);
+
   return <Game />;
 };
 

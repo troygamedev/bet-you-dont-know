@@ -1,18 +1,14 @@
 import Head from "next/head";
-import Footer from "@components/Footer/Footer";
 
-import Header from "@components/Header/Header";
 import LobbyList from "@components/LobbyList/LobbyList";
+import Layout from "@components/Layout/Layout";
 
 const Home: React.FC = () => {
   return (
     <>
-      <Head>
-        <title>Chess Clock Trivia</title>
-      </Head>
-      <Header />
-      <LobbyList />
-      <Footer />
+      <Layout title="Chess Clock Trivia">
+        <LobbyList />
+      </Layout>
     </>
   );
 };
