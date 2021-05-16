@@ -4,6 +4,7 @@ export interface User {
   username: string;
   socketID: string;
   lobbyID: number;
+  isReady?: boolean;
 }
 
 export interface ChatMessage {

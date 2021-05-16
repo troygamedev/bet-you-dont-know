@@ -27,7 +27,7 @@ const Game: React.FC = () => {
             chatList={lobby.chatMessages}
           />
           <div>
-            <h3>Players in Lobby: </h3>
+            <h3>Players in {lobby.name} </h3>
             {lobby.users &&
               lobby.users.map((user, idx) => {
                 if (user == me) {

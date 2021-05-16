@@ -2,29 +2,30 @@ import SocketContext from "@context/SocketContext";
 import { useState, useEffect, useContext } from "react";
 import { Lobby } from "@shared/types";
 import styles from "./LobbyList.module.scss";
+import { useRouter } from "next/router";
 
 const LobbyList: React.FC = () => {
   const socket = useContext(SocketContext);
 
   const [lobbyList, setLobbyList] = useState<Array<Lobby>>();
-  const [showLobbies, setShowLobbies] = useState(true);
   useEffect(() => {
     socket.on("updateLobbyList", (lobbies: Array<Lobby>) => {
       setLobbyList(lobbies);
     });
 
-    socket.on("lobbyJoined", (lobby: Lobby) => {
-      setShowLobbies(false);
-    });
+    // socket.on("lobbyJoined", (lobby: Lobby) => {
+    //   setShowLobbies(false);
+    // });
   }, []);
 
+  const router = useRouter();
+
   const onJoinLobbyClick = (lobbyID: number) => {
-    socket.emit("joinLobby", lobbyID);
+    router.push("/lobby/" + lobbyID);
   };
   return (
     <div>
-      {showLobbies &&
-        lobbyList &&
+      {lobbyList &&
         lobbyList.map((lobby: Lobby, idx) => {
           return (
             <div

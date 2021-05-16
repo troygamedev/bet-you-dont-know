@@ -54,7 +54,7 @@ for (let i = 0; i < NUM_LOBBIES; i++) {
   let chatMessages: Array<ChatMessage> = [];
   lobbies.push({
     id: i,
-    name: "Lobby Room " + i,
+    name: "Lobby Room " + String.fromCharCode("A".charCodeAt(0) + i),
     users: users,
     chatMessages: chatMessages,
   });
@@ -73,7 +73,7 @@ io.on("connection", (socket: Socket) => {
 
   socket.emit("updateLobbyList", lobbies);
 
-  const MAX_CHAT_MESSAGES = 20;
+  const MAX_CHAT_MESSAGES = 15;
   const sendMessage = (lobbyID: number, msg: ChatMessage) => {
     const thisLobby = lobbies[lobbyID];
     //send a chat message
@@ -86,7 +86,16 @@ io.on("connection", (socket: Socket) => {
   };
 
   socket.on("joinLobby", (lobbyID: number) => {
+    if (lobbyID == null) return; // make sure the lobbyID isnt null
+    // make sure the lobbyID actually exists in the lobbies list
+    let flag = false;
+    lobbies.forEach((lobby) => {
+      if (lobby.id == lobbyID) flag = true;
+    });
+    if (!flag) return;
+
     const thisLobby = lobbies[lobbyID];
+
     // send event to hide the user's lobby list
     socket.emit("lobbyJoined", thisLobby);
 
@@ -145,7 +154,7 @@ io.on("connection", (socket: Socket) => {
 
           // send a server message that someone has left
           sendMessage(lobby.id, {
-            message: user.username + " has joined the lobby!",
+            message: user.username + " has left the lobby!",
             timestamp: dayjs(),
             isServer: true,
           });
