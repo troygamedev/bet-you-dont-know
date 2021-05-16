@@ -1,6 +1,5 @@
 import LobbyList from "@components/LobbyList/LobbyList";
 import Layout from "@components/Layout/Layout";
-import UsernameBox from "@components/UsernameBox/UsernameBox";
 
 const Home: React.FC = () => {
   return (
