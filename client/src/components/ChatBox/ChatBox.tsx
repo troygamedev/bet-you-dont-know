@@ -44,7 +44,9 @@ const ChatBox: React.FC<Props> = (props) => {
               </div>
             );
           }
-          return <div key={idx}>{msg.user.username + ": " + msg.message}</div>;
+          return (
+            <div key={idx}>{msg.user.displayName + ": " + msg.message}</div>
+          );
         }
       })}
       <div>

@@ -43,11 +43,6 @@ app.use(
   })
 );
 
-// //Routes//
-// app.get("/api", (req, res) => {
-//   res.json({ message: "hola" });
-// });
-
 const NUM_LOBBIES = 5;
 let lobbies: Array<Lobby> = [];
 for (let i = 0; i < NUM_LOBBIES; i++) {
@@ -100,9 +95,11 @@ io.on("connection", (socket: Socket) => {
     // create the new user
     const newUser: User = {
       username: "User" + thisLobby.users.length,
+      displayName: "User" + thisLobby.users.length,
       lobbyID: thisLobby.id,
       socketID: socket.id,
       hasSetName: false,
+      usernameConflictIndex: 0,
     };
     // add them to the user list
     thisLobby.users.push(newUser);
@@ -110,6 +107,12 @@ io.on("connection", (socket: Socket) => {
     // subscribe them to the corresponding lobby room
     const lobbyIDToString = lobbies[lobbyID].id.toString();
     socket.join(lobbyIDToString);
+
+    sendMessage(thisLobby.id, {
+      message: "Someone has joined and is picking their username right now...",
+      timestamp: dayjs(),
+      isServer: true,
+    });
 
     // update everyone's lobby object with the newest changes
     socket.to(lobbyIDToString).emit("updateLobby", lobbies[lobbyID]);
@@ -144,12 +147,43 @@ io.on("connection", (socket: Socket) => {
       (thisUser) => thisUser.socketID == user.socketID
     );
 
+    // set the new name and mark as set
     theUser.username = newUsername;
     theUser.hasSetName = true;
 
+    // check if this username conflicts with anyone else in the lobby
+    // if there is the same name, just append an index
+
+    // find the guy with the largest conflict index that also has the same conflicting name
+    // ex: Bob0, Bob1, Bob2 <-- find Bob2
+    let biggestConflictingIndex = 0;
+    let thisNameIsADuplicate = false;
+    lobbies[user.lobbyID].users.forEach((thisUser) => {
+      if (
+        thisUser.username == theUser.username &&
+        thisUser.socketID != socket.id
+      ) {
+        biggestConflictingIndex = Math.max(
+          biggestConflictingIndex,
+          thisUser.usernameConflictIndex
+        );
+        thisNameIsADuplicate = true;
+      }
+    });
+    if (thisNameIsADuplicate) {
+      theUser.usernameConflictIndex = biggestConflictingIndex + 1;
+    }
+    if (theUser.usernameConflictIndex >= 1) {
+      // conflicting name, add a number to the end
+      theUser.displayName = theUser.username + theUser.usernameConflictIndex;
+    } else {
+      // unique name, no problem
+      theUser.displayName = theUser.username;
+    }
+
     // announce that the user has joined the lobby if this is their first set
     sendMessage(theUser.lobbyID, {
-      message: theUser.username + " has joined the lobby!",
+      message: theUser.displayName + " has joined the lobby!",
       timestamp: dayjs(),
       isServer: true,
     });
@@ -158,7 +192,7 @@ io.on("connection", (socket: Socket) => {
     io.to(user.lobbyID.toString()).emit("updateLobby", lobbies[user.lobbyID]);
     socket.emit("updateLobby", lobbies[user.lobbyID]);
   });
-  const leaveParty = (socket: Socket) => {
+  const leaveParty = () => {
     // search through lobbies for this user
     lobbies.forEach((lobby) => {
       lobby.users.forEach((user, idx) => {
@@ -170,7 +204,7 @@ io.on("connection", (socket: Socket) => {
 
           // send a server message that someone has left
           sendMessage(lobby.id, {
-            message: user.username + " has left the lobby!",
+            message: user.displayName + " has left the lobby!",
             timestamp: dayjs(),
             isServer: true,
           });
@@ -186,13 +220,11 @@ io.on("connection", (socket: Socket) => {
     });
   };
 
-  socket.on("setUsername", (newUsername: string) => {});
-
   socket.on("leaveParty", () => {
-    leaveParty(socket);
+    leaveParty();
   });
   socket.on("disconnect", () => {
-    leaveParty(socket);
+    leaveParty();
   });
 });
 

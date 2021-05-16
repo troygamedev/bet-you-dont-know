@@ -1,6 +1,5 @@
 import ChatBox from "@components/ChatBox/ChatBox";
 import Layout from "@components/Layout/Layout";
-import UsernameBox from "@components/UsernameBox/UsernameBox";
 import SocketContext from "@context/SocketContext";
 import { Lobby, User } from "@shared/types";
 import { useEffect, useState, useContext } from "react";
@@ -64,9 +63,9 @@ const Game: React.FC = () => {
             {lobby.users &&
               lobby.users.map((user, idx) => {
                 if (user == me) {
-                  return <p key={idx}>{user.username + " (You)"}</p>;
+                  return <p key={idx}>{user.displayName + " (You)"}</p>;
                 }
-                return <p key={idx}>{user.username}</p>;
+                return <p key={idx}>{user.displayName}</p>;
               })}
           </div>
           {lobby.users && lobby.users.length >= 2 ? (

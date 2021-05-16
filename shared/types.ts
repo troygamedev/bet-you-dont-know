@@ -2,9 +2,11 @@ import dayjs from "dayjs";
 
 export interface User {
   username: string;
+  displayName: string;
   socketID: string;
   lobbyID: number;
-  hasSetName?: boolean;
+  usernameConflictIndex: number;
+  hasSetName: boolean;
   isReady?: boolean;
 }
 
