@@ -5,6 +5,7 @@ import path from "path";
 import cors from "cors";
 import { ChatMessage, Lobby, User } from "@shared/types";
 import dayjs from "dayjs";
+import { userInfo } from "node:os";
 
 const PORT = process.env.PORT || 5000;
 
@@ -96,24 +97,15 @@ io.on("connection", (socket: Socket) => {
 
     const thisLobby = lobbies[lobbyID];
 
-    // send event to hide the user's lobby list
-    socket.emit("lobbyJoined", thisLobby);
-
     // create the new user
     const newUser: User = {
       username: "User" + thisLobby.users.length,
       lobbyID: thisLobby.id,
       socketID: socket.id,
+      hasSetName: false,
     };
     // add them to the user list
     thisLobby.users.push(newUser);
-
-    // send a server message
-    sendMessage(lobbyID, {
-      message: newUser.username + " has joined the lobby!",
-      timestamp: dayjs(),
-      isServer: true,
-    });
 
     // subscribe them to the corresponding lobby room
     const lobbyIDToString = lobbies[lobbyID].id.toString();
@@ -146,6 +138,26 @@ io.on("connection", (socket: Socket) => {
     socket.emit("updateLobbyList", lobbies);
   });
 
+  socket.on("setUsername", (user: User, newUsername: string) => {
+    // find the user in the lobby user list
+    const theUser = lobbies[user.lobbyID].users.find(
+      (thisUser) => thisUser.socketID == user.socketID
+    );
+
+    theUser.username = newUsername;
+    theUser.hasSetName = true;
+
+    // announce that the user has joined the lobby if this is their first set
+    sendMessage(theUser.lobbyID, {
+      message: theUser.username + " has joined the lobby!",
+      timestamp: dayjs(),
+      isServer: true,
+    });
+
+    // tell everyone in the lobby to update their lobby object
+    io.to(user.lobbyID.toString()).emit("updateLobby", lobbies[user.lobbyID]);
+    socket.emit("updateLobby", lobbies[user.lobbyID]);
+  });
   const leaveParty = (socket: Socket) => {
     // search through lobbies for this user
     lobbies.forEach((lobby) => {
@@ -167,13 +179,14 @@ io.on("connection", (socket: Socket) => {
 
           // leave the room
           socket.leave(lobby.id.toString());
-
           // tell everyone to update the lobby list
           io.emit("updateLobbyList", lobbies);
         }
       });
     });
   };
+
+  socket.on("setUsername", (newUsername: string) => {});
 
   socket.on("leaveParty", () => {
     leaveParty(socket);
