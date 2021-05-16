@@ -1,5 +1,3 @@
-import Head from "next/head";
-
 import LobbyList from "@components/LobbyList/LobbyList";
 import Layout from "@components/Layout/Layout";
 

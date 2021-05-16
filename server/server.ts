@@ -142,7 +142,11 @@ io.on("connection", (socket: Socket) => {
     socket.emit("updateLobby", lobbies[lobbyID]);
   });
 
-  socket.on("disconnect", () => {
+  socket.on("refetchLobbyList", () => {
+    socket.emit("updateLobbyList", lobbies);
+  });
+
+  const leaveParty = (socket: Socket) => {
     // search through lobbies for this user
     lobbies.forEach((lobby) => {
       lobby.users.forEach((user, idx) => {
@@ -169,6 +173,13 @@ io.on("connection", (socket: Socket) => {
         }
       });
     });
+  };
+
+  socket.on("leaveParty", () => {
+    leaveParty(socket);
+  });
+  socket.on("disconnect", () => {
+    leaveParty(socket);
   });
 });
 

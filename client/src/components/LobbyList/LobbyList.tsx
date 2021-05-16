@@ -8,14 +8,13 @@ const LobbyList: React.FC = () => {
   const socket = useContext(SocketContext);
 
   const [lobbyList, setLobbyList] = useState<Array<Lobby>>();
+
   useEffect(() => {
     socket.on("updateLobbyList", (lobbies: Array<Lobby>) => {
       setLobbyList(lobbies);
     });
 
-    // socket.on("lobbyJoined", (lobby: Lobby) => {
-    //   setShowLobbies(false);
-    // });
+    socket.emit("refetchLobbyList");
   }, []);
 
   const router = useRouter();

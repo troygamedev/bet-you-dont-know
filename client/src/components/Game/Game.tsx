@@ -1,7 +1,7 @@
 import ChatBox from "@components/ChatBox/ChatBox";
 import Layout from "@components/Layout/Layout";
 import SocketContext from "@context/SocketContext";
-import { ChatMessage, Lobby, User } from "@shared/types";
+import { Lobby } from "@shared/types";
 import { useEffect, useState, useContext } from "react";
 import styles from "./Game.module.scss";
 
@@ -14,6 +14,9 @@ const Game: React.FC = () => {
     socket.on("updateLobby", (newLobby: Lobby) => {
       setLobby(newLobby);
     });
+    return () => {
+      socket.emit("leaveParty");
+    };
   }, []);
 
   const me = lobby && lobby.users.find((user) => user.socketID == socket.id);
