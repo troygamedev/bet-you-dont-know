@@ -5,7 +5,6 @@ import path from "path";
 import cors from "cors";
 import { ChatMessage, Lobby, User } from "@shared/types";
 import dayjs from "dayjs";
-import { userInfo } from "node:os";
 
 const PORT = process.env.PORT || 5000;
 
@@ -226,6 +225,18 @@ io.on("connection", (socket: Socket) => {
   socket.on("disconnect", () => {
     leaveParty(socket);
   });
+});
+
+// app.use(
+//   express.static(path.join(__dirname, "../client/out"), {
+//     // index: false,
+//     extensions: ["html"],
+//   })
+// );
+
+app.get("/lobby/:lobbyID", (req, res) => {
+  const path = "[slug].html";
+  res.sendFile(path, { root: "../client/out/lobby/" });
 });
 
 server.listen(PORT, () => {
