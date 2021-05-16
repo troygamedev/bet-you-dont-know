@@ -192,7 +192,7 @@ io.on("connection", (socket: Socket) => {
     io.to(user.lobbyID.toString()).emit("updateLobby", lobbies[user.lobbyID]);
     socket.emit("updateLobby", lobbies[user.lobbyID]);
   });
-  const leaveParty = () => {
+  const leaveParty = (socket: Socket) => {
     // search through lobbies for this user
     lobbies.forEach((lobby) => {
       lobby.users.forEach((user, idx) => {
@@ -221,10 +221,10 @@ io.on("connection", (socket: Socket) => {
   };
 
   socket.on("leaveParty", () => {
-    leaveParty();
+    leaveParty(socket);
   });
   socket.on("disconnect", () => {
-    leaveParty();
+    leaveParty(socket);
   });
 });
 
