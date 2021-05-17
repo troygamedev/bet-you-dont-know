@@ -298,6 +298,11 @@ io.on("connection", (socket: Socket) => {
           // remove the user from lobby if the socket id matches
           lobby.users.splice(userIdx, 1);
 
+          // give the the next user the lobby leader permission
+          if (lobby.users.length > 0) {
+            lobby.users[0].isLeader = true;
+          }
+
           // send a server message that someone has left
           sendMessage(lobby.id, {
             message: user.displayName + " has left the lobby!",
