@@ -80,6 +80,17 @@ io.on("connection", (socket: Socket) => {
     }
   };
 
+  // helper function that emits an event to the user as well as everyone in the lobby
+  const emitLobbyEvent = (
+    thisSocket: Socket,
+    lobbyID: number,
+    eventName: string,
+    params
+  ) => {
+    io.to(lobbyID.toString()).emit(eventName, params);
+    thisSocket.emit(eventName, params);
+  };
+
   socket.on("joinLobby", (lobbyID: number) => {
     if (lobbyID == null) return; // make sure the lobbyID isnt null
     // make sure the lobbyID actually exists in the lobbies list
@@ -114,8 +125,7 @@ io.on("connection", (socket: Socket) => {
     });
 
     // update everyone's lobby object with the newest changes
-    socket.to(lobbyIDToString).emit("updateLobby", lobbies[lobbyID]);
-    socket.emit("updateLobby", lobbies[lobbyID]);
+    emitLobbyEvent(socket, lobbyID, "updateLobby", lobbies[lobbyID]);
 
     // refresh everyone's lobbies list
     io.emit("updateLobbyList", lobbies);
@@ -131,20 +141,23 @@ io.on("connection", (socket: Socket) => {
       user: sender,
     });
     // send this to everyone in the room
-    socket.to(lobbyIDToString).emit("updateLobby", lobbies[lobbyID]);
-    // as well as the sender
-    socket.emit("updateLobby", lobbies[lobbyID]);
+    emitLobbyEvent(socket, lobbyID, "updateLobby", lobbies[lobbyID]);
   });
 
   socket.on("refetchLobbyList", () => {
     socket.emit("updateLobbyList", lobbies);
   });
 
-  socket.on("setUsername", (user: User, newUsername: string) => {
+  const getUserReference = (user: User) => {
     // find the user in the lobby user list
-    const theUser = lobbies[user.lobbyID].users.find(
+    return lobbies[user.lobbyID].users.find(
       (thisUser) => thisUser.socketID == user.socketID
     );
+  };
+
+  socket.on("setUsername", (user: User, newUsername: string) => {
+    // find the user in the lobby user list
+    const theUser = getUserReference(user);
 
     // set the new name and mark as set
     theUser.username = newUsername;
@@ -188,14 +201,19 @@ io.on("connection", (socket: Socket) => {
     });
 
     // tell everyone in the lobby to update their lobby object
-    io.to(user.lobbyID.toString()).emit("updateLobby", lobbies[user.lobbyID]);
-    socket.emit("updateLobby", lobbies[user.lobbyID]);
+    emitLobbyEvent(
+      socket,
+      theUser.lobbyID,
+      "updateLobby",
+      lobbies[user.lobbyID]
+    );
   });
-  const leaveParty = (socket: Socket) => {
+
+  const leaveParty = (thisSocket: Socket) => {
     // search through lobbies for this user
     lobbies.forEach((lobby) => {
       lobby.users.forEach((user, idx) => {
-        if (user.socketID == socket.id) {
+        if (user.socketID == thisSocket.id) {
           // remove the user from lobby if the socket id matches
           lobby.users.splice(idx, idx + 1);
 
@@ -207,17 +225,31 @@ io.on("connection", (socket: Socket) => {
             timestamp: dayjs(),
             isServer: true,
           });
-          // tell everyone in the room to get the newest changes
-          socket.to(lobbyIDToString).emit("updateLobby", lobby);
+          // tell everyone in the room to get the newest changes (except the guy leaving)
+          thisSocket.to(lobbyIDToString).emit("updateLobby", lobby);
 
           // leave the room
-          socket.leave(lobby.id.toString());
+          thisSocket.leave(lobby.id.toString());
+
           // tell everyone to update the lobby list
           io.emit("updateLobbyList", lobbies);
         }
       });
     });
   };
+
+  socket.on("setReady", (user: User, isReady: boolean) => {
+    const theUser = getUserReference(user);
+    theUser.isReady = isReady;
+
+    // tell everyone in the lobby to update their lobby object
+    emitLobbyEvent(
+      socket,
+      theUser.lobbyID,
+      "updateLobby",
+      lobbies[user.lobbyID]
+    );
+  });
 
   socket.on("leaveParty", () => {
     leaveParty(socket);

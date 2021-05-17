@@ -45,7 +45,12 @@ const ChatBox: React.FC<Props> = (props) => {
             );
           }
           return (
-            <div key={idx}>{msg.user.displayName + ": " + msg.message}</div>
+            <div key={idx}>
+              {msg.user.displayName +
+                (props.sender.socketID == socket.id && " (You)") +
+                ": " +
+                msg.message}
+            </div>
           );
         }
       })}

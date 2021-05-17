@@ -35,6 +35,12 @@ const Game: React.FC = () => {
       setUsername();
     }
   };
+
+  const [isReady, setIsReady] = useState(false);
+  const onReadyPress = () => {
+    setIsReady(!isReady);
+    socket.emit("setReady", me, isReady);
+  };
   return (
     <Layout title={lobby && lobby.name}>
       {(me && me.hasSetName) || (
@@ -62,14 +68,18 @@ const Game: React.FC = () => {
             <h3>Players in {lobby.name} </h3>
             {lobby.users &&
               lobby.users.map((user, idx) => {
-                if (user == me) {
-                  return <p key={idx}>{user.displayName + " (You)"}</p>;
-                }
-                return <p key={idx}>{user.displayName}</p>;
+                return (
+                  <div>
+                    <p key={idx} style={{ color: user.isReady && "lime" }}>
+                      {user.displayName +
+                        (user.socketID == socket.id ? " (You)" : "")}
+                    </p>
+                  </div>
+                );
               })}
           </div>
           {lobby.users && lobby.users.length >= 2 ? (
-            <button>Ready</button>
+            <button onClick={() => onReadyPress()}>Ready</button>
           ) : (
             <div>Waiting for 1 more player to join...</div>
           )}
