@@ -6,7 +6,7 @@ import React, { useState, useContext, useEffect } from "react";
 
 interface Props {
   sender: User;
-  lobbyID: number;
+  lobbyID: string;
   chatList: Array<ChatMessage>;
 }
 
@@ -46,7 +46,8 @@ const ChatBox: React.FC<Props> = (props) => {
           }
           return (
             <div key={idx}>
-              {msg.user.displayName +
+              {(msg.user.isLeader ? "[LEADER] " : "") +
+                msg.user.displayName +
                 (props.sender.socketID == socket.id && " (You)") +
                 ": " +
                 msg.message}

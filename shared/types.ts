@@ -4,10 +4,11 @@ export interface User {
   username: string;
   displayName: string;
   socketID: string;
-  lobbyID: number;
+  lobbyID: string;
   usernameConflictIndex: number;
   hasSetName: boolean;
-  isReady?: boolean;
+  isReady: boolean;
+  isLeader: boolean;
 }
 
 export interface ChatMessage {
@@ -19,7 +20,8 @@ export interface ChatMessage {
 
 export interface Lobby {
   name: string;
-  id: number;
+  id: string;
   users: Array<User>;
   chatMessages: Array<ChatMessage>;
+  isPublic: boolean;
 }

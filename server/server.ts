@@ -42,18 +42,153 @@ app.use(
   })
 );
 
-const NUM_LOBBIES = 5;
 let lobbies: Array<Lobby> = [];
-for (let i = 0; i < NUM_LOBBIES; i++) {
+
+const findLobbyWithID = (searchID: string) => {
+  return lobbies.find((lobby) => lobby.id == searchID);
+};
+
+const myCustomDictionary = [
+  "pizza",
+  "chocolate",
+  "syrup",
+  "soccer",
+  "hockey",
+  "donkey",
+  "chess",
+  "pasta",
+  "candy",
+  "water",
+  "fire",
+  "prisma",
+  "cyclone",
+  "tornado",
+  "ice",
+  "brilliant",
+  "alpha",
+  "alfa",
+  "bravo",
+  "charlie",
+  "delta",
+  "echo",
+  "foxtrot",
+  "golf",
+  "hotel",
+  "india",
+  "juliett",
+  "kilo",
+  "lima",
+  "mike",
+  "november",
+  "oscar",
+  "papa",
+  "quebec",
+  "romeo",
+  "sierra",
+  "tango",
+  "uniform",
+  "victor",
+  "whiskey",
+  "x-ray",
+  "yankee",
+  "zulu",
+];
+
+const createLobby = () => {
   let users: Array<User> = [];
   let chatMessages: Array<ChatMessage> = [];
+
+  // pick a random word from the dictionary
+  let randomName = "";
+  // keep picking until its a unique lobby id
+  do {
+    randomName =
+      myCustomDictionary[~~(Math.random() * myCustomDictionary.length)];
+  } while (
+    lobbies.findIndex((existingLobby) => existingLobby.id == randomName) != -1
+  );
+
   lobbies.push({
-    id: i,
-    name: "Lobby Room " + String.fromCharCode("A".charCodeAt(0) + i),
+    id: randomName,
+    name: "Lobby " + randomName.charAt(0).toUpperCase() + randomName.slice(1),
     users: users,
     chatMessages: chatMessages,
+    isPublic: false,
   });
-}
+  return randomName;
+};
+
+const getPublicLobbies = () => {
+  let ans: Array<Lobby> = [];
+  lobbies.forEach((thisLobby) => {
+    if (thisLobby.isPublic) ans.push(thisLobby);
+  });
+  return ans;
+};
+
+const joinLobby = (thisSocket: Socket, lobbyID: string) => {
+  if (lobbyID == null) return; // make sure the lobbyID isnt null
+
+  // make sure the lobbyID actually exists in the lobbies list
+  const thisLobby = findLobbyWithID(lobbyID);
+  if (thisLobby == null) {
+    thisSocket.emit("joinLobbyError", "It looks like this lobby doesn't exist");
+    return;
+  }
+
+  // create the new user
+  const newUser: User = {
+    username: "User" + thisLobby.users.length,
+    displayName: "User" + thisLobby.users.length,
+    lobbyID: thisLobby.id,
+    socketID: thisSocket.id,
+    hasSetName: false,
+    usernameConflictIndex: 0,
+    isReady: false,
+    isLeader: thisLobby.users.length == 0,
+  };
+
+  // add them to the user list
+  thisLobby.users.push(newUser);
+
+  // subscribe them to the corresponding lobby room
+  thisSocket.join(thisLobby.id);
+
+  sendMessage(thisLobby.id, {
+    message: "Someone has joined and is picking their username right now...",
+    timestamp: dayjs(),
+    isServer: true,
+  });
+
+  // update everyone's lobby object with the newest changes
+  emitLobbyEvent(thisSocket, lobbyID, "updateLobby", thisLobby);
+
+  // refresh everyone's lobbies list
+  io.emit("updatePublicLobbyList", getPublicLobbies());
+};
+
+const MAX_CHAT_MESSAGES = 15;
+const sendMessage = (lobbyID: string, msg: ChatMessage) => {
+  const thisLobby = findLobbyWithID(lobbyID);
+
+  //send a chat message
+  thisLobby.chatMessages.push(msg);
+
+  // make sure the number of chat messages don't exceed the limit
+  if (thisLobby.chatMessages.length > MAX_CHAT_MESSAGES) {
+    thisLobby.chatMessages.shift();
+  }
+};
+// helper function that emits an event to the user as well as everyone in the lobby
+const emitLobbyEvent = (
+  thisSocket: Socket,
+  lobbyID: string,
+  eventName: string,
+  params
+) => {
+  io.to(lobbyID).emit(eventName, params);
+  thisSocket.emit(eventName, params);
+};
 
 // on connect
 io.on("connection", (socket: Socket) => {
@@ -66,91 +201,41 @@ io.on("connection", (socket: Socket) => {
   // to everyone
   // io.emit("message", "hello")
 
-  socket.emit("updateLobbyList", lobbies);
+  socket.emit("updatePublicLobbyList", getPublicLobbies());
 
-  const MAX_CHAT_MESSAGES = 15;
-  const sendMessage = (lobbyID: number, msg: ChatMessage) => {
-    const thisLobby = lobbies[lobbyID];
-    //send a chat message
-    thisLobby.chatMessages.push(msg);
-
-    // make sure the number of chat messages don't exceed the limit
-    if (thisLobby.chatMessages.length > MAX_CHAT_MESSAGES) {
-      thisLobby.chatMessages.shift();
-    }
-  };
-
-  // helper function that emits an event to the user as well as everyone in the lobby
-  const emitLobbyEvent = (
-    thisSocket: Socket,
-    lobbyID: number,
-    eventName: string,
-    params
-  ) => {
-    io.to(lobbyID.toString()).emit(eventName, params);
-    thisSocket.emit(eventName, params);
-  };
-
-  socket.on("joinLobby", (lobbyID: number) => {
-    if (lobbyID == null) return; // make sure the lobbyID isnt null
-    // make sure the lobbyID actually exists in the lobbies list
-    let flag = false;
-    lobbies.forEach((lobby) => {
-      if (lobby.id == lobbyID) flag = true;
-    });
-    if (!flag) return;
-
-    const thisLobby = lobbies[lobbyID];
-
-    // create the new user
-    const newUser: User = {
-      username: "User" + thisLobby.users.length,
-      displayName: "User" + thisLobby.users.length,
-      lobbyID: thisLobby.id,
-      socketID: socket.id,
-      hasSetName: false,
-      usernameConflictIndex: 0,
-    };
-    // add them to the user list
-    thisLobby.users.push(newUser);
-
-    // subscribe them to the corresponding lobby room
-    const lobbyIDToString = lobbies[lobbyID].id.toString();
-    socket.join(lobbyIDToString);
-
-    sendMessage(thisLobby.id, {
-      message: "Someone has joined and is picking their username right now...",
-      timestamp: dayjs(),
-      isServer: true,
-    });
-
-    // update everyone's lobby object with the newest changes
-    emitLobbyEvent(socket, lobbyID, "updateLobby", lobbies[lobbyID]);
-
-    // refresh everyone's lobbies list
-    io.emit("updateLobbyList", lobbies);
+  socket.on("createLobby", () => {
+    const newLobbyID = createLobby();
+    // send back to the client the new id, so they can join it
+    socket.emit("lobbyCreated", newLobbyID);
   });
 
-  socket.on("sendMessage", (lobbyID: number, message: string, sender: User) => {
-    const lobbyIDToString = lobbyID.toString();
+  socket.on("joinLobby", (lobbyID: string) => {
+    joinLobby(socket, lobbyID);
+  });
 
+  socket.on("sendMessage", (lobbyID: string, message: string, sender: User) => {
     sendMessage(lobbyID, {
       message: message,
       timestamp: dayjs(),
       isServer: false,
       user: sender,
     });
+
+    const thisLobby = findLobbyWithID(lobbyID);
+
     // send this to everyone in the room
-    emitLobbyEvent(socket, lobbyID, "updateLobby", lobbies[lobbyID]);
+    emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
   });
 
-  socket.on("refetchLobbyList", () => {
-    socket.emit("updateLobbyList", lobbies);
+  socket.on("refetchPublicLobbyList", () => {
+    socket.emit("updatePublicLobbyList", getPublicLobbies());
   });
 
   const getUserReference = (user: User) => {
     // find the user in the lobby user list
-    return lobbies[user.lobbyID].users.find(
+    if (user == null) return null;
+    const thisLobby = findLobbyWithID(user.lobbyID);
+    return thisLobby.users.find(
       (thisUser) => thisUser.socketID == user.socketID
     );
   };
@@ -170,7 +255,8 @@ io.on("connection", (socket: Socket) => {
     // ex: Bob0, Bob1, Bob2 <-- find Bob2
     let biggestConflictingIndex = 0;
     let thisNameIsADuplicate = false;
-    lobbies[user.lobbyID].users.forEach((thisUser) => {
+    const thisLobby = findLobbyWithID(user.lobbyID);
+    thisLobby.users.forEach((thisUser) => {
       if (
         thisUser.username == theUser.username &&
         thisUser.socketID != socket.id
@@ -201,15 +287,11 @@ io.on("connection", (socket: Socket) => {
     });
 
     // tell everyone in the lobby to update their lobby object
-    emitLobbyEvent(
-      socket,
-      theUser.lobbyID,
-      "updateLobby",
-      lobbies[user.lobbyID]
-    );
+    emitLobbyEvent(socket, theUser.lobbyID, "updateLobby", thisLobby);
   });
 
-  const leaveParty = (thisSocket: Socket) => {
+  const leaveLobby = (thisSocket: Socket) => {
+    console.log(thisSocket.id + " has left");
     // search through lobbies for this user
     lobbies.forEach((lobby) => {
       lobby.users.forEach((user, idx) => {
@@ -217,22 +299,21 @@ io.on("connection", (socket: Socket) => {
           // remove the user from lobby if the socket id matches
           lobby.users.splice(idx, idx + 1);
 
-          const lobbyIDToString = lobby.id.toString();
-
           // send a server message that someone has left
           sendMessage(lobby.id, {
             message: user.displayName + " has left the lobby!",
             timestamp: dayjs(),
             isServer: true,
           });
+
           // tell everyone in the room to get the newest changes (except the guy leaving)
-          thisSocket.to(lobbyIDToString).emit("updateLobby", lobby);
+          thisSocket.to(lobby.id).emit("updateLobby", lobby);
 
           // leave the room
-          thisSocket.leave(lobby.id.toString());
+          thisSocket.leave(lobby.id);
 
-          // tell everyone to update the lobby list
-          io.emit("updateLobbyList", lobbies);
+          // tell everyone  to update the lobby list
+          io.emit("updatePublicLobbyList", getPublicLobbies());
         }
       });
     });
@@ -242,20 +323,17 @@ io.on("connection", (socket: Socket) => {
     const theUser = getUserReference(user);
     theUser.isReady = isReady;
 
+    const thisLobby = findLobbyWithID(user.lobbyID);
+
     // tell everyone in the lobby to update their lobby object
-    emitLobbyEvent(
-      socket,
-      theUser.lobbyID,
-      "updateLobby",
-      lobbies[user.lobbyID]
-    );
+    emitLobbyEvent(socket, theUser.lobbyID, "updateLobby", thisLobby);
   });
 
   socket.on("leaveParty", () => {
-    leaveParty(socket);
+    leaveLobby(socket);
   });
   socket.on("disconnect", () => {
-    leaveParty(socket);
+    leaveLobby(socket);
   });
 });
 
@@ -267,8 +345,8 @@ io.on("connection", (socket: Socket) => {
 // );
 
 app.get("/lobby/:lobbyID", (req, res) => {
-  const path = "[slug].html";
-  res.sendFile(path, { root: "../client/out/lobby/" });
+  const filePath = "[slug].html";
+  res.sendFile(filePath, { root: "../client/out/lobby/" });
 });
 
 server.listen(PORT, () => {
