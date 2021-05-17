@@ -291,7 +291,6 @@ io.on("connection", (socket: Socket) => {
   });
 
   const leaveLobby = (thisSocket: Socket) => {
-    console.log(thisSocket.id + " has left");
     // search through lobbies for this user
     lobbies.forEach((lobby) => {
       lobby.users.forEach((user, idx) => {
@@ -327,6 +326,16 @@ io.on("connection", (socket: Socket) => {
 
     // tell everyone in the lobby to update their lobby object
     emitLobbyEvent(socket, theUser.lobbyID, "updateLobby", thisLobby);
+  });
+  socket.on("setLobbyPublic", (lobbyID: string, isPublic: boolean) => {
+    const thisLobby = findLobbyWithID(lobbyID);
+    thisLobby.isPublic = isPublic;
+
+    // tell everyone in the lobby to update their lobby object
+    emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
+
+    // refresh everyone's lobbies list
+    io.emit("updatePublicLobbyList", getPublicLobbies());
   });
 
   socket.on("leaveParty", () => {

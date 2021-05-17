@@ -4,6 +4,7 @@ import SocketContext from "@context/SocketContext";
 import { Lobby, User } from "@shared/types";
 import { useEffect, useState, useContext } from "react";
 import swal from "sweetalert";
+import Switch from "react-switch";
 
 import styles from "./Game.module.scss";
 
@@ -50,8 +51,8 @@ const Game: React.FC = () => {
 
   const [isReady, setIsReady] = useState(false);
   const onReadyPress = () => {
+    socket.emit("setReady", me, !isReady);
     setIsReady(!isReady);
-    socket.emit("setReady", me, isReady);
   };
 
   const playerList =
@@ -70,6 +71,28 @@ const Game: React.FC = () => {
         </div>
       );
     });
+
+  const [publicLobby, setPublicLobby] = useState(false);
+  const handlePublicChange = () => {
+    socket.emit("setLobbyPublic", me.lobbyID, !publicLobby);
+    setPublicLobby(!publicLobby);
+  };
+
+  const publicSwitch = lobby && me && (
+    <div>
+      {me.isLeader && (
+        <div>
+          <label htmlFor="public or private lobby">
+            <span>Make lobby public</span>
+            <Switch
+              onChange={() => handlePublicChange()}
+              checked={publicLobby}
+            />
+          </label>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <Layout title={lobby && lobby.name}>
@@ -94,6 +117,7 @@ const Game: React.FC = () => {
             lobbyID={lobby.id}
             chatList={lobby.chatMessages}
           />
+          {publicSwitch}
           <div>
             <h3>Players in {lobby.name} </h3>
             {playerList}
