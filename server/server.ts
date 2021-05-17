@@ -292,11 +292,11 @@ io.on("connection", (socket: Socket) => {
 
   const leaveLobby = (thisSocket: Socket) => {
     // search through lobbies for this user
-    lobbies.forEach((lobby) => {
-      lobby.users.forEach((user, idx) => {
+    lobbies.forEach((lobby, lobbyIdx) => {
+      lobby.users.forEach((user, userIdx) => {
         if (user.socketID == thisSocket.id) {
           // remove the user from lobby if the socket id matches
-          lobby.users.splice(idx, idx + 1);
+          lobby.users.splice(userIdx, 1);
 
           // send a server message that someone has left
           sendMessage(lobby.id, {
@@ -311,6 +311,10 @@ io.on("connection", (socket: Socket) => {
           // leave the room
           thisSocket.leave(lobby.id);
 
+          // if this lobby no longer has people, recycle it (delete it)
+          if (lobby != null && lobby.users.length == 0) {
+            lobbies.splice(lobbyIdx, 1);
+          }
           // tell everyone  to update the lobby list
           io.emit("updatePublicLobbyList", getPublicLobbies());
         }
@@ -338,7 +342,7 @@ io.on("connection", (socket: Socket) => {
     io.emit("updatePublicLobbyList", getPublicLobbies());
   });
 
-  socket.on("leaveParty", () => {
+  socket.on("leaveLobby", () => {
     leaveLobby(socket);
   });
   socket.on("disconnect", () => {
