@@ -55,82 +55,94 @@ const Game: React.FC = () => {
     setIsReady(!isReady);
   };
 
-  const playerList =
-    lobby &&
-    me &&
-    me.hasSetName &&
-    lobby.users &&
-    lobby.users.map((user, idx) => {
-      return (
-        <div>
-          <p key={idx} style={{ color: user.isReady && "lime" }}>
-            {(user.isLeader ? "[LEADER] " : "") +
-              user.displayName +
-              (user.socketID == socket.id ? " (You)" : "")}
-          </p>
-        </div>
-      );
-    });
-
   const [publicLobby, setPublicLobby] = useState(false);
+
   const handlePublicChange = () => {
     socket.emit("setLobbyPublic", me.lobbyID, !publicLobby);
     setPublicLobby(!publicLobby);
   };
 
-  const publicSwitch = lobby && me && (
-    <div>
-      {me.isLeader && (
-        <div>
-          <label htmlFor="public or private lobby">
-            <span>Make lobby public</span>
-            <Switch
-              onChange={() => handlePublicChange()}
-              checked={publicLobby}
-            />
-          </label>
-        </div>
-      )}
-    </div>
-  );
-
-  return (
-    <Layout title={lobby && lobby.name}>
-      {(me && me.hasSetName) || (
-        <div>
-          <div>Enter your Username</div>
-          <input
-            type="text"
-            name="username"
-            value={usernameBox}
-            onChange={(e) => {
-              setUsernameBox(e.target.value);
-            }}
-            onKeyDown={(e) => handleKeyDown(e)}
-          />
-        </div>
-      )}
-      {lobby && me && me.hasSetName && (
-        <>
-          <ChatBox
-            sender={me}
-            lobbyID={lobby.id}
-            chatList={lobby.chatMessages}
-          />
-          {publicSwitch}
+  if (lobby && me) {
+    const playerList =
+      me.hasSetName &&
+      lobby.users &&
+      lobby.users.map((user, idx) => {
+        return (
           <div>
-            <h3>Players in {lobby.name} </h3>
-            {playerList}
+            <p key={idx} style={{ color: user.isReady && "lime" }}>
+              {(user.isLeader ? "[LEADER] " : "") +
+                user.displayName +
+                (user.socketID == socket.id ? " (You)" : "")}
+            </p>
           </div>
-          {lobby.users && lobby.users.length >= 2 ? (
-            <button onClick={() => onReadyPress()}>Ready</button>
-          ) : (
-            <div>Waiting for 1 more player to join...</div>
-          )}
-        </>
-      )}
-    </Layout>
-  );
+        );
+      });
+
+    const publicSwitch = (
+      <div>
+        {me.isLeader && (
+          <div>
+            <label htmlFor="public or private lobby">
+              <span>Make lobby public</span>
+              <Switch
+                onChange={() => handlePublicChange()}
+                checked={publicLobby}
+              />
+            </label>
+          </div>
+        )}
+      </div>
+    );
+
+    const namePickElem = me.hasSetName || (
+      <div>
+        <div>Enter your Username</div>
+        <input
+          type="text"
+          name="username"
+          value={usernameBox}
+          onChange={(e) => {
+            setUsernameBox(e.target.value);
+          }}
+          onKeyDown={(e) => handleKeyDown(e)}
+        />
+      </div>
+    );
+
+    const readyElem =
+      lobby.users && lobby.users.length >= 2 ? (
+        <button onClick={() => onReadyPress()}>Ready</button>
+      ) : (
+        <div>Waiting for 1 more player to join...</div>
+      );
+
+    const startElem = lobby.users &&
+      !lobby.users.find((user) => !user.isReady) && <button>Start</button>;
+
+    return (
+      <Layout title={lobby.name}>
+        {namePickElem}
+        {me.hasSetName && (
+          <>
+            <ChatBox
+              sender={me}
+              lobbyID={lobby.id}
+              chatList={lobby.chatMessages}
+            />
+            {publicSwitch}
+            <div>
+              <h3>Players in {lobby.name} </h3>
+              {playerList}
+              {readyElem}
+              {startElem}
+            </div>
+          </>
+        )}
+      </Layout>
+    );
+  } else {
+    return <div>Loading...</div>;
+  }
 };
 
 export default Game;
