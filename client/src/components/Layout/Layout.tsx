@@ -24,7 +24,7 @@ const Layout: React.FC<Props> = (props) => {
       <Head>
         <title>{props.title}</title>
       </Head>
-      <Header />
+      <Header headerText="Bet You Don't Know" />
       {isConnected ? props.children : "Loading..."}
       <Footer />
     </>
