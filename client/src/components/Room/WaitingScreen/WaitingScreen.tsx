@@ -1,8 +1,6 @@
-import Layout from "@components/Layout/Layout";
 import SocketContext from "@context/SocketContext";
 import { Lobby, User } from "@shared/types";
 import { useState, useContext } from "react";
-import ChatBox from "../ChatBox/ChatBox";
 import Switch from "react-switch";
 
 interface Props {
@@ -25,7 +23,9 @@ const WaitingScreen: React.FC<Props> = (props) => {
     setPublicLobby(!publicLobby);
   };
 
-  const onStartPress = () => {};
+  const onStartPress = () => {
+    socket.emit("startGame", props.lobby.id);
+  };
 
   const playerList =
     props.lobby.users &&
@@ -65,6 +65,7 @@ const WaitingScreen: React.FC<Props> = (props) => {
     );
 
   const startElem = props.lobby.users &&
+    props.lobby.users.length >= 2 &&
     !props.lobby.users.find((user) => !user.isReady) && (
       <button onClick={() => onStartPress()}>Start</button>
     );
@@ -72,11 +73,6 @@ const WaitingScreen: React.FC<Props> = (props) => {
   return (
     props.me.hasSetName && (
       <>
-        <ChatBox
-          sender={props.me}
-          lobbyID={props.lobby.id}
-          chatList={props.lobby.chatMessages}
-        />
         {publicSwitch}
         <div>
           <h3>Players in {props.lobby.name} </h3>

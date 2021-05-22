@@ -337,6 +337,7 @@ io.on("connection", (socket: Socket) => {
     // tell everyone in the lobby to update their lobby object
     emitLobbyEvent(socket, theUser.lobbyID, "updateLobby", thisLobby);
   });
+
   socket.on("setLobbyPublic", (lobbyID: string, isPublic: boolean) => {
     const thisLobby = findLobbyWithID(lobbyID);
     thisLobby.isPublic = isPublic;
@@ -346,6 +347,13 @@ io.on("connection", (socket: Socket) => {
 
     // refresh everyone's lobbies list
     io.emit("updatePublicLobbyList", getPublicLobbies());
+  });
+
+  socket.on("startGame", (lobbyID: string) => {
+    const thisLobby = findLobbyWithID(lobbyID);
+    thisLobby.isInGame = true;
+    // tell everyone in the lobby to update their lobby object
+    emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
   });
 
   socket.on("leaveLobby", () => {

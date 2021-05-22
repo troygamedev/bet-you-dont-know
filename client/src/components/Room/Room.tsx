@@ -3,6 +3,7 @@ import SocketContext from "@context/SocketContext";
 import { Lobby, User } from "@shared/types";
 import { useEffect, useState, useContext } from "react";
 import swal from "sweetalert";
+import ChatBox from "./ChatBox/ChatBox";
 import GameScreen from "./GameScreen/GameScreen";
 import WaitingScreen from "./WaitingScreen/WaitingScreen";
 
@@ -69,6 +70,7 @@ const Room: React.FC = () => {
 
     return (
       <Layout title={lobby.name ? lobby.name : "Loading..."}>
+        <ChatBox sender={me} lobbyID={lobby.id} chatList={lobby.chatMessages} />
         {namePickElem}
         {screenElem}
       </Layout>
