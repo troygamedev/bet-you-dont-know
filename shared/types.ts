@@ -24,4 +24,5 @@ export interface Lobby {
   users: Array<User>;
   chatMessages: Array<ChatMessage>;
   isPublic: boolean;
+  isInGame: boolean;
 }

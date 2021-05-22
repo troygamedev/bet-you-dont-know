@@ -114,6 +114,7 @@ const createLobby = () => {
     users: users,
     chatMessages: chatMessages,
     isPublic: false,
+    isInGame: false,
   });
   return randomName;
 };

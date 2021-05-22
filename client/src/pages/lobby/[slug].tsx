@@ -1,4 +1,4 @@
-import Game from "@components/Game/Game";
+import Room from "@components/Room/Room";
 import SocketContext from "@context/SocketContext";
 import { useRouter } from "next/router";
 import { useContext, useEffect } from "react";
@@ -12,7 +12,7 @@ const Lobby: React.FC = () => {
     socket.emit("joinLobby", slug);
   }, [slug]);
 
-  return <Game />;
+  return <Room />;
 };
 
 export default Lobby;
