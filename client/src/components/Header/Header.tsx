@@ -1,4 +1,3 @@
-import { prependOnceListener } from "node:process";
 import styles from "./Header.module.scss";
 
 interface Props {

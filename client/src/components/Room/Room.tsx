@@ -70,7 +70,13 @@ const Room: React.FC = () => {
 
     return (
       <Layout title={lobby.name ? lobby.name : "Loading..."}>
-        <ChatBox sender={me} lobbyID={lobby.id} chatList={lobby.chatMessages} />
+        {me.hasSetName && (
+          <ChatBox
+            sender={me}
+            lobbyID={lobby.id}
+            chatList={lobby.chatMessages}
+          />
+        )}
         {namePickElem}
         {screenElem}
       </Layout>
