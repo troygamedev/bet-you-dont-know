@@ -3,8 +3,9 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
-import { ChatMessage, Lobby, User } from "@shared/types";
+import { ChatMessage, Lobby, User, TriviaQuestion } from "@shared/types";
 import dayjs from "dayjs";
+import fetch from "node-fetch";
 
 const PORT = process.env.PORT || 5000;
 
@@ -41,6 +42,35 @@ app.use(
     extensions: ["html"],
   })
 );
+
+// fetch from the trivia json file
+
+let triviaQuestions: Array<TriviaQuestion> = [];
+
+const TRIVIA_ENDPOINT =
+  "https://troygamedev.github.io/trivia-game-data/questions.json";
+
+const fetchTriviaQuestions = async () => {
+  try {
+    // clear the old list
+    triviaQuestions = [];
+
+    // read the json file and push them into the array as TriviaQuestion objects
+    const response = await fetch(TRIVIA_ENDPOINT);
+    const json = await response.json();
+    json.list.forEach((item) => {
+      triviaQuestions.push({
+        question: item.question,
+        wrongChoices: item.choices,
+        answer: item.answer,
+      });
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+fetchTriviaQuestions();
 
 let lobbies: Array<Lobby> = [];
 

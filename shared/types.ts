@@ -26,3 +26,9 @@ export interface Lobby {
   isPublic: boolean;
   isInGame: boolean;
 }
+
+export interface TriviaQuestion {
+  question: string;
+  wrongChoices: Array<string>;
+  answer: string;
+}
