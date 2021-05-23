@@ -25,6 +25,11 @@ export interface Lobby {
   chatMessages: Array<ChatMessage>;
   isPublic: boolean;
   isInGame: boolean;
+  game: Game;
+}
+
+export interface Game {
+  timeLeft: number;
 }
 
 export interface TriviaQuestion {

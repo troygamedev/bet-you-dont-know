@@ -70,7 +70,12 @@ const fetchTriviaQuestions = async () => {
   }
 };
 
-fetchTriviaQuestions();
+const everyHour = () => {
+  // refresh trivia questions every hour
+  fetchTriviaQuestions();
+  setInterval(fetchTriviaQuestions, 1000 * 60 * 60);
+};
+everyHour();
 
 let lobbies: Array<Lobby> = [];
 
@@ -145,6 +150,9 @@ const createLobby = () => {
     chatMessages: chatMessages,
     isPublic: false,
     isInGame: false,
+    game: {
+      timeLeft: 0,
+    },
   });
   return randomName;
 };
