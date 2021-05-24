@@ -77,16 +77,19 @@ const WaitingScreen: React.FC<Props> = (props) => {
   );
 
   const readyElem =
-    props.lobby.users && props.lobby.users.length >= 2 ? (
+    props.lobby.players && props.lobby.players.length >= 2 ? (
       <button onClick={() => onReadyPress()}>Ready</button>
     ) : (
-      <div>Waiting for 1 more player to join...</div>
+      <div>
+        {2 - props.lobby.players.length} or more players are required to start
+        this game
+      </div>
     );
 
   const startElem = props.me.isLeader &&
-    props.lobby.users &&
-    props.lobby.users.length >= 2 &&
-    !props.lobby.users.find((user) => !user.isReady) && (
+    props.lobby.players &&
+    props.lobby.players.length >= 2 &&
+    !props.lobby.players.find((user) => !user.isReady) && (
       <button onClick={() => onStartPress()}>Start</button>
     );
 

@@ -23,6 +23,7 @@ export interface Lobby {
   name: string;
   id: string;
   users: Array<User>;
+  players: Array<User>; // players are any user that isnt a spectator
   chatMessages: Array<ChatMessage>;
   isPublic: boolean;
   isInGame: boolean;

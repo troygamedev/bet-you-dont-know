@@ -145,6 +145,7 @@ const myCustomDictionary = [
 
 const createLobby = () => {
   let users: Array<User> = [];
+  let players: Array<User> = [];
   let chatMessages: Array<ChatMessage> = [];
 
   // pick a random word from the dictionary
@@ -161,6 +162,7 @@ const createLobby = () => {
     id: randomName,
     name: "Lobby " + randomName.charAt(0).toUpperCase() + randomName.slice(1),
     users: users,
+    players: players,
     chatMessages: chatMessages,
     isPublic: false,
     isInGame: false,
@@ -207,6 +209,8 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
 
   // add them to the user list
   thisLobby.users.push(newUser);
+  // add them to the players list
+  thisLobby.players.push(newUser);
 
   // subscribe them to the corresponding lobby room
   thisSocket.join(thisLobby.id);
@@ -368,7 +372,7 @@ io.on("connection", (socket: Socket) => {
           });
 
           // tell everyone in the room to get the newest changes (except the guy leaving)
-          thisSocket.to(lobby.id).emit("updateLobby", lobby);
+          emitLobbyEvent(thisSocket, lobby.id, "updateLobby", lobby);
 
           // leave the room
           thisSocket.leave(lobby.id);
@@ -398,13 +402,31 @@ io.on("connection", (socket: Socket) => {
     const thisUser = getUserReference(user);
     thisUser.isSpectator = isSpectator;
 
+    const thisLobby = findLobbyWithID(user.lobbyID);
+
+    // helper function
+    const findIndexOfUserInPlayersList = () => {
+      return thisLobby.players.findIndex((user) => {
+        user.socketID === thisUser.socketID;
+      });
+    };
+
+    // add/remove them from the players list
+    if (isSpectator) {
+      // find and remove this user from the player list
+      thisLobby.players.splice(findIndexOfUserInPlayersList(), 1);
+    } else {
+      // add this user to the player list
+      // check for duplicate just in case
+      if (findIndexOfUserInPlayersList() === -1) {
+        thisLobby.players.push(thisUser);
+      }
+    }
+
+    thisUser.isReady = false;
+
     // tell everyone in the lobby to update their lobby object
-    emitLobbyEvent(
-      socket,
-      user.lobbyID,
-      "updateLobby",
-      findLobbyWithID(user.lobbyID)
-    );
+    emitLobbyEvent(socket, user.lobbyID, "updateLobby", thisLobby);
   });
   socket.on("setLobbyPublic", (lobbyID: string, isPublic: boolean) => {
     const thisLobby = findLobbyWithID(lobbyID);
@@ -420,10 +442,6 @@ io.on("connection", (socket: Socket) => {
   socket.on("startGame", (lobbyID: string) => {
     const thisLobby = findLobbyWithID(lobbyID);
     thisLobby.isInGame = true;
-
-    // start the countdown
-    thisLobby.game.gameStage = "Countdown";
-    thisLobby.game.timeLeft = 3;
 
     // recursive countdown
     const countdown = (callbackWhenComplete: () => void) => {
@@ -445,8 +463,12 @@ io.on("connection", (socket: Socket) => {
       }
     };
 
+    // start the countdown, then set the game to "answering phase" when it finishes counting down
+    thisLobby.game.gameStage = "Countdown";
+    thisLobby.game.timeLeft = 3;
     countdown(() => {
       thisLobby.game.gameStage = "Answering";
+      thisLobby.game.currentAnswerer = thisLobby.players[0];
     });
   });
 
