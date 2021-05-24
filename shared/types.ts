@@ -9,6 +9,7 @@ export interface User {
   hasSetName: boolean;
   isReady: boolean;
   isLeader: boolean;
+  isSpectator: boolean;
 }
 
 export interface ChatMessage {

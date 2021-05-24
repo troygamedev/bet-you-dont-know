@@ -185,6 +185,7 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
     usernameConflictIndex: 0,
     isReady: false,
     isLeader: thisLobby.users.length == 0,
+    isSpectator: false,
   };
 
   // add them to the user list
@@ -376,6 +377,18 @@ io.on("connection", (socket: Socket) => {
     emitLobbyEvent(socket, theUser.lobbyID, "updateLobby", thisLobby);
   });
 
+  socket.on("setIsSpectator", (user: User, isSpectator: boolean) => {
+    const thisUser = getUserReference(user);
+    thisUser.isSpectator = isSpectator;
+
+    // tell everyone in the lobby to update their lobby object
+    emitLobbyEvent(
+      socket,
+      user.lobbyID,
+      "updateLobby",
+      findLobbyWithID(user.lobbyID)
+    );
+  });
   socket.on("setLobbyPublic", (lobbyID: string, isPublic: boolean) => {
     const thisLobby = findLobbyWithID(lobbyID);
     thisLobby.isPublic = isPublic;

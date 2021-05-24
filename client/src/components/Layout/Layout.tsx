@@ -3,6 +3,7 @@ import Header from "@components/Header/Header";
 import Head from "next/head";
 import { useEffect, useState, useContext } from "react";
 import SocketContext from "@context/SocketContext";
+import styles from "./Layout.module.scss";
 
 interface Props {
   title: string;
@@ -24,8 +25,10 @@ const Layout: React.FC<Props> = (props) => {
       <Head>
         <title>{props.title}</title>
       </Head>
-      <Header headerText="Bet You Don't Know" />
-      {isConnected ? props.children : "Loading..."}
+      <main className={styles.main}>
+        <Header headerText="Bet You Don't Know" />
+        {isConnected ? props.children : "Loading..."}
+      </main>
       <Footer />
     </>
   );
