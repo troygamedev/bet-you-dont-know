@@ -29,13 +29,12 @@ export interface Lobby {
   game: Game;
 }
 
-export enum GameStage {
-  Countdown = 0,
-  Answering = 1,
-  Betting = 2,
-  Paying = 3,
-  GameOver = 4,
-}
+export type GameStage =
+  | "Countdown"
+  | "Answering"
+  | "Betting"
+  | "Paying"
+  | "GameOver";
 
 export interface Game {
   timeLeft: number;

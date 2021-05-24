@@ -168,7 +168,7 @@ const createLobby = () => {
       timeLeft: 0,
       currentAnswerer: undefined,
       currentQuestion: undefined,
-      gameStage: GameStage.Countdown,
+      gameStage: "Countdown",
     },
   });
   return randomName;

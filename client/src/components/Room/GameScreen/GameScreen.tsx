@@ -7,11 +7,11 @@ interface Props {
 }
 
 const GameScreen: React.FC<Props> = (props) => {
-  const countdownElem = props.lobby.game.gameStage === GameStage.Countdown && (
+  const countdownElem = props.lobby.game.gameStage === "Countdown" && (
     <div>Game starting in {props.lobby.game.timeLeft}</div>
   );
   let answeringElem: JSX.Element;
-  if (props.lobby.game.gameStage === GameStage.Answering) {
+  if (props.lobby.game.gameStage === "Answering") {
     const currentQuestion = props.lobby.game.currentQuestion;
     answeringElem = (
       <div>
@@ -28,10 +28,12 @@ const GameScreen: React.FC<Props> = (props) => {
     if (props.lobby.game.currentAnswerer.socketID === props.me.socketID) {
     }
   }
+  const num: GameStage = "Countdown";
   return (
     <div>
       {countdownElem}
       {answeringElem}
+      {num}
     </div>
   );
 };
