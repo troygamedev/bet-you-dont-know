@@ -420,8 +420,34 @@ io.on("connection", (socket: Socket) => {
   socket.on("startGame", (lobbyID: string) => {
     const thisLobby = findLobbyWithID(lobbyID);
     thisLobby.isInGame = true;
-    // tell everyone in the lobby to update their lobby object
-    emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
+
+    // start the countdown
+    thisLobby.game.gameStage = "Countdown";
+    thisLobby.game.timeLeft = 3;
+
+    // recursive countdown
+    const countdown = (callbackWhenComplete: () => void) => {
+      // if the countdown is finished
+      if (thisLobby.game.timeLeft <= 0) {
+        callbackWhenComplete();
+        // tell everyone in the lobby to update their lobby object
+        emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
+      } else {
+        // tell everyone in the lobby to update their lobby object
+        emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
+
+        // call itself again after 1 second
+        thisLobby.game.timeLeft--;
+
+        setTimeout(() => {
+          countdown(callbackWhenComplete);
+        }, 1000);
+      }
+    };
+
+    countdown(() => {
+      thisLobby.game.gameStage = "Answering";
+    });
   });
 
   socket.on("leaveLobby", () => {

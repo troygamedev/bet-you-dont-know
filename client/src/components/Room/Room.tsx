@@ -114,6 +114,8 @@ const Room: React.FC = () => {
         )}
         {namePickElem}
         {screenElem}
+        <br />
+        <br />
         {rulesElem}
       </Layout>
     );
