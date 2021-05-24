@@ -3,7 +3,14 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
-import { ChatMessage, Lobby, User, TriviaQuestion } from "@shared/types";
+import {
+  ChatMessage,
+  Lobby,
+  User,
+  TriviaQuestion,
+  GameStage,
+} from "@shared/types";
+
 import dayjs from "dayjs";
 import fetch from "node-fetch";
 
@@ -58,11 +65,18 @@ const fetchTriviaQuestions = async () => {
     // read the json file and push them into the array as TriviaQuestion objects
     const response = await fetch(TRIVIA_ENDPOINT);
     const json = await response.json();
+
     json.list.forEach((item) => {
+      // shuffle the choices
+      var shuffle = require("shuffle-array"),
+        shuffledChoices = item.choices;
+      shuffledChoices.push(item.answer);
+      shuffle(shuffledChoices, { copy: true });
       triviaQuestions.push({
         question: item.question,
         wrongChoices: item.choices,
         answer: item.answer,
+        allChoicesRandomized: shuffledChoices,
       });
     });
   } catch (error) {
@@ -152,6 +166,9 @@ const createLobby = () => {
     isInGame: false,
     game: {
       timeLeft: 0,
+      currentAnswerer: undefined,
+      currentQuestion: undefined,
+      gameStage: GameStage.Countdown,
     },
   });
   return randomName;

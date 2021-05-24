@@ -29,12 +29,24 @@ export interface Lobby {
   game: Game;
 }
 
+export enum GameStage {
+  Countdown = 0,
+  Answering = 1,
+  Betting = 2,
+  Paying = 3,
+  GameOver = 4,
+}
+
 export interface Game {
   timeLeft: number;
+  currentQuestion: TriviaQuestion;
+  currentAnswerer: User;
+  gameStage: GameStage;
 }
 
 export interface TriviaQuestion {
   question: string;
   wrongChoices: Array<string>;
   answer: string;
+  allChoicesRandomized: Array<string>;
 }
