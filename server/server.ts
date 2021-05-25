@@ -480,6 +480,13 @@ io.on("connection", (socket: Socket) => {
       thisLobby.game.currentAnswerer = thisLobby.players[0];
       thisLobby.game.currentQuestion =
         triviaQuestions[randomIndexesArray[thisLobby.game.roundsCompleted]];
+
+      const answerDuration = 15;
+      thisLobby.game.timeLeft = answerDuration;
+      countdown(() => {
+        thisLobby.game.gameStage = "Betting";
+        console.log("BETTING TIME");
+      });
     });
   });
 

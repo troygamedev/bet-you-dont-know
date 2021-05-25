@@ -93,9 +93,14 @@ const WaitingScreen: React.FC<Props> = (props) => {
       <button onClick={() => onStartPress()}>Start</button>
     );
 
+  // PURELY FOR TESTING PURPOSES
+  const testingElem = (
+    <button onClick={() => onStartPress()}>admin button ooo</button>
+  );
   return (
     props.me.hasSetName && (
       <>
+        {testingElem}
         {spectatorSwitch}
         {publicSwitch}
         <div>
