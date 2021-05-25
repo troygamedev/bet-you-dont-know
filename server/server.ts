@@ -57,6 +57,8 @@ let triviaQuestions: Array<TriviaQuestion> = [];
 const TRIVIA_ENDPOINT =
   "https://troygamedev.github.io/trivia-game-data/questions.json";
 
+const shuffle = require("shuffle-array");
+
 const fetchTriviaQuestions = async () => {
   try {
     // clear the old list
@@ -68,8 +70,7 @@ const fetchTriviaQuestions = async () => {
 
     json.list.forEach((item) => {
       // shuffle the choices
-      var shuffle = require("shuffle-array"),
-        shuffledChoices = item.choices;
+      let shuffledChoices = item.choices;
       shuffledChoices.push(item.answer);
       shuffle(shuffledChoices, { copy: true });
       triviaQuestions.push({
@@ -171,6 +172,7 @@ const createLobby = () => {
       currentAnswerer: undefined,
       currentQuestion: undefined,
       gameStage: "Countdown",
+      roundsCompleted: 0,
     },
   });
   return randomName;
@@ -406,8 +408,8 @@ io.on("connection", (socket: Socket) => {
 
     // helper function
     const findIndexOfUserInPlayersList = () => {
-      return thisLobby.players.findIndex((user) => {
-        user.socketID === thisUser.socketID;
+      return thisLobby.players.findIndex((searchUser) => {
+        return searchUser.socketID === thisUser.socketID;
       });
     };
 
@@ -468,7 +470,20 @@ io.on("connection", (socket: Socket) => {
     thisLobby.game.timeLeft = 3;
     countdown(() => {
       thisLobby.game.gameStage = "Answering";
+
+      // create an array that will determine the random order of which the trivia questions are picked
+      // ex: [3, 12, 4, 0, 2, 8, ...] will pick triviaQuestions[3] as the first question, and so on...
+      let randomIndexesArray: Array<number> = [];
+      // first fill this array with all the triviaQuestions (copy it over)
+      for (let i = 0; i < triviaQuestions.length; i++) {
+        randomIndexesArray.push(i);
+      }
+      // then, shuffle this array of [0,1,2,3,4,5... triviaQuestions.length-1]
+      shuffle(randomIndexesArray);
+
       thisLobby.game.currentAnswerer = thisLobby.players[0];
+      thisLobby.game.currentQuestion =
+        triviaQuestions[randomIndexesArray[thisLobby.game.roundsCompleted]];
     });
   });
 

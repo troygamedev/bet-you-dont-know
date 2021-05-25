@@ -42,6 +42,7 @@ export interface Game {
   currentQuestion: TriviaQuestion;
   currentAnswerer: User;
   gameStage: GameStage;
+  roundsCompleted: number;
 }
 
 export interface TriviaQuestion {
