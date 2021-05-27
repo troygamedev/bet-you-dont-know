@@ -1,6 +1,6 @@
 import styles from "./GameScreen.module.scss";
 import { GameStage, Lobby, User } from "@shared/types";
-import { useContext } from "react";
+import { ChangeEvent, useContext, useState } from "react";
 import SocketContext from "@context/SocketContext";
 
 interface Props {
@@ -11,9 +11,13 @@ interface Props {
 const GameScreen: React.FC<Props> = (props) => {
   const socket = useContext(SocketContext);
 
-  const countdownElem = props.lobby.game.gameStage === "Countdown" && (
-    <div>Game starting in {props.lobby.game.timeLeft}</div>
-  );
+  const countdownElem =
+    props.lobby.game.gameStage === "Countdown" ? (
+      <div>Game starting in {props.lobby.game.timeLeft}</div>
+    ) : (
+      <div>Time remaining: {props.lobby.game.timeLeft}</div>
+    );
+
   let answeringElem: JSX.Element;
 
   const onQuestionClick = () => {
@@ -53,10 +57,61 @@ const GameScreen: React.FC<Props> = (props) => {
       );
     }
   }
+  let bettingElem = <></>;
+  const [betValue, setBetValue] = useState(0);
+  const handleBetValueChange = (e: ChangeEvent<HTMLInputElement>) => {
+    try {
+      let num = parseInt(e.target.value);
+
+      // clamp this value between 0 and this player's current balance
+      num = Math.max(0, Math.min(num, props.me.money));
+
+      setBetValue(num);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  if (props.lobby.game.gameStage === "Betting") {
+    // if i was not the one who answered
+    if (props.lobby.game.currentAnswerer.socketID !== props.me.socketID) {
+      bettingElem = (
+        <>
+          <label htmlFor="bet">
+            How much do you bet that{" "}
+            {props.lobby.game.currentAnswerer.displayName} answered incorrectly?
+          </label>
+          <input
+            type="number"
+            min={0}
+            max={props.me.money}
+            step={props.me.money / 10}
+            value={betValue}
+            onChange={(e) => {
+              handleBetValueChange(e);
+            }}
+          ></input>
+        </>
+      );
+    }
+  }
+
+  const gameInfoElem = props.lobby.game.gameStage != "Countdown" && (
+    <div>
+      <p>{props.lobby.game.gameStage} Phase</p>
+      <p>Round {props.lobby.game.roundsCompleted + 1}</p>
+      <p>
+        Currently Answering: {props.lobby.game.currentAnswerer.displayName}{" "}
+      </p>
+    </div>
+  );
+  const moneyElem = <div>Your balance: ${props.me.money}</div>;
   return (
     <div>
+      {gameInfoElem}
       {countdownElem}
+      {moneyElem}
       {answeringElem}
+      {bettingElem}
     </div>
   );
 };

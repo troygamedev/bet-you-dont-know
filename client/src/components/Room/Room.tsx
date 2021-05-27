@@ -40,7 +40,15 @@ const Room: React.FC = () => {
   const [usernameBox, setUsernameBox] = useState("");
 
   const setUsername = () => {
-    socket.emit("setUsername", me, usernameBox);
+    if (usernameBox == "") {
+      swal({
+        title: "Invalid Username",
+        text: "Please enter a valid username.",
+        icon: "warning",
+      });
+    } else {
+      socket.emit("setUsername", me, usernameBox);
+    }
   };
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {

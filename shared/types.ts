@@ -10,6 +10,7 @@ export interface User {
   isReady: boolean;
   isLeader: boolean;
   isSpectator: boolean;
+  money: number;
 }
 
 export interface ChatMessage {
@@ -34,7 +35,7 @@ export type GameStage =
   | "Countdown"
   | "Answering"
   | "Betting"
-  | "Paying"
+  | "Reveal"
   | "GameOver";
 
 export interface Game {
@@ -43,6 +44,7 @@ export interface Game {
   currentAnswerer: User;
   gameStage: GameStage;
   roundsCompleted: number;
+  roundsLimit: number;
 }
 
 export interface TriviaQuestion {

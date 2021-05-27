@@ -69,15 +69,11 @@ const fetchTriviaQuestions = async () => {
     const json = await response.json();
 
     json.list.forEach((item) => {
-      // shuffle the choices
-      let shuffledChoices = item.choices;
-      shuffledChoices.push(item.answer);
-      shuffle(shuffledChoices, { copy: true });
       triviaQuestions.push({
         question: item.question,
         wrongChoices: item.choices,
         answer: item.answer,
-        allChoicesRandomized: shuffledChoices,
+        allChoicesRandomized: undefined,
       });
     });
   } catch (error) {
@@ -169,6 +165,7 @@ const createLobby = () => {
       currentQuestion: undefined,
       gameStage: "Countdown",
       roundsCompleted: 0,
+      roundsLimit: 3,
     },
   });
   return randomName;
@@ -188,7 +185,10 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
   // make sure the lobbyID actually exists in the lobbies list
   const thisLobby = findLobbyWithID(lobbyID);
   if (thisLobby == null) {
-    thisSocket.emit("joinLobbyError", "It looks like this lobby doesn't exist");
+    thisSocket.emit(
+      "joinLobbyError",
+      "It looks like this lobby doesn't exist anymore"
+    );
     return;
   }
 
@@ -203,6 +203,7 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
     isReady: false,
     isLeader: thisLobby.users.length == 0,
     isSpectator: false,
+    money: 1000,
   };
 
   // add them to the user list
@@ -440,54 +441,114 @@ io.on("connection", (socket: Socket) => {
   socket.on("startGame", (lobbyID: string) => {
     const thisLobby = findLobbyWithID(lobbyID);
     thisLobby.isInGame = true;
+    // set everyones balance to default 1000
+    thisLobby.players.forEach((player) => {
+      player.money = 1000;
+    });
 
-    // recursive countdown
-    const countdown = (callbackWhenComplete: () => void) => {
-      // if the countdown is finished
-      if (thisLobby.game.timeLeft <= 0) {
-        callbackWhenComplete();
+    // countdown until timeLeft hits 0
+    const countdown = (callbackWhenComplete: () => void, duration: number) => {
+      thisLobby.game.timeLeft = duration;
+
+      // tell everyone in the lobby to update their lobby object
+      emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
+
+      const tick = () => {
+        // if the countdown is finished
+        if (thisLobby.game.timeLeft <= 0) {
+          callbackWhenComplete();
+        } else {
+          thisLobby.game.timeLeft--;
+
+          // call itself again after 1 second
+          setTimeout(tick, 1000);
+        }
         // tell everyone in the lobby to update their lobby object
         emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
-      } else {
-        // tell everyone in the lobby to update their lobby object
-        emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
-
-        // call itself again after 1 second
-        thisLobby.game.timeLeft--;
-
-        setTimeout(() => {
-          countdown(callbackWhenComplete);
-        }, 1000);
-      }
+      };
+      setTimeout(tick, 1000);
     };
 
     // start the countdown, then set the game to "answering phase" when it finishes counting down
     thisLobby.game.gameStage = "Countdown";
-    thisLobby.game.timeLeft = 3;
     countdown(() => {
+      startAnsweringStage();
+    }, 3);
+
+    // create an array that will determine the random order of which the trivia questions are picked
+    // ex: [3, 12, 4, 0, 2, 8, ...] will pick triviaQuestions[3] as the first question, and so on...
+    let randomIndexesArray: Array<number> = [];
+    // first fill this array with all the triviaQuestions (copy it over)
+    for (let i = 0; i < triviaQuestions.length; i++) {
+      randomIndexesArray.push(i);
+    }
+    // then, shuffle this array of [0,1,2,3,4,5... triviaQuestions.length-1]
+    shuffle(randomIndexesArray);
+
+    const startAnsweringStage = () => {
       thisLobby.game.gameStage = "Answering";
 
-      // create an array that will determine the random order of which the trivia questions are picked
-      // ex: [3, 12, 4, 0, 2, 8, ...] will pick triviaQuestions[3] as the first question, and so on...
-      let randomIndexesArray: Array<number> = [];
-      // first fill this array with all the triviaQuestions (copy it over)
-      for (let i = 0; i < triviaQuestions.length; i++) {
-        randomIndexesArray.push(i);
-      }
-      // then, shuffle this array of [0,1,2,3,4,5... triviaQuestions.length-1]
-      shuffle(randomIndexesArray);
+      thisLobby.game.currentAnswerer =
+        thisLobby.players[
+          thisLobby.game.roundsCompleted % thisLobby.players.length
+        ];
 
-      thisLobby.game.currentAnswerer = thisLobby.players[0];
-      thisLobby.game.currentQuestion =
+      const currentQuestion =
         triviaQuestions[randomIndexesArray[thisLobby.game.roundsCompleted]];
+      thisLobby.game.currentQuestion = currentQuestion;
 
+      // shuffle the choices
+      const allChoices = currentQuestion.wrongChoices.concat(
+        currentQuestion.answer
+      );
+      shuffle(allChoices);
+      thisLobby.game.currentQuestion.allChoicesRandomized = allChoices;
+
+      // start the betting stage after answeringDuration seconds
       const answerDuration = 15;
-      thisLobby.game.timeLeft = answerDuration;
       countdown(() => {
-        thisLobby.game.gameStage = "Betting";
-        console.log("BETTING TIME");
+        startBettingStage();
+      }, answerDuration);
+    };
+
+    const startBettingStage = () => {
+      thisLobby.game.gameStage = "Betting";
+
+      // start the reveal stage after bettingDuration seconds
+      const bettingDuration = 15;
+      countdown(() => {
+        startRevealStage();
+      }, bettingDuration);
+    };
+
+    const startRevealStage = () => {
+      thisLobby.game.gameStage = "Reveal";
+      const revealDuration = 8;
+      countdown(() => {
+        // check if game is over
+        thisLobby.game.roundsCompleted++;
+        if (thisLobby.game.roundsCompleted >= thisLobby.game.roundsLimit) {
+          startGameOverStage();
+        } else {
+          startAnsweringStage();
+        }
+      }, revealDuration);
+    };
+
+    const startGameOverStage = () => {
+      thisLobby.game.gameStage = "GameOver";
+
+      // do some resetting
+      thisLobby.isInGame = false;
+      thisLobby.game.roundsCompleted = 0;
+      // set everyone to unready
+      thisLobby.users.forEach((user) => {
+        user.isReady = false;
       });
-    });
+
+      // tell everyone in the lobby to update their lobby object
+      emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
+    };
   });
 
   socket.on("leaveLobby", () => {
