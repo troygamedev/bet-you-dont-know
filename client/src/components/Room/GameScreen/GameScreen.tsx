@@ -64,6 +64,13 @@ const GameScreen: React.FC<Props> = (props) => {
   }
   let bettingElem = <></>;
   const [betValue, setBetValue] = useState(0);
+
+  // when this player is mad broke (into debt), make sure they cant bet anything
+  useEffect(() => {
+    if (props.me.money < 0) {
+      setBetValue(0);
+    }
+  }, [props.me.money]);
   const handleBetValueChange = (e: ChangeEvent<HTMLInputElement>) => {
     try {
       let num = parseInt(e.target.value);

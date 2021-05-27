@@ -549,47 +549,67 @@ io.on("connection", (socket: Socket) => {
       const theAnswerer = thisLobby.game.currentAnswerer;
 
       // if the answerer guessed correctly
-      if (
+      let wasCorrect =
         theAnswerer.guessIndex ===
-        thisLobby.game.currentQuestion.correctAnswerIndex
-      ) {
-        // loop through each player to see how much they bet (how much they lose)
-        thisLobby.players.forEach((player) => {
-          // if it's NOT the answerer
-          if (player.socketID !== theAnswerer.displayName) {
-            if (player.bet !== 0) {
-              // deduct their balance for their incorrect bet
+        thisLobby.game.currentQuestion.correctAnswerIndex;
+      sendMessage(lobbyID, {
+        message: `${theAnswerer.displayName} answered ${
+          wasCorrect ? "correctly!" : "incorrectly!"
+        }!`,
+        timestamp: dayjs(),
+        isServer: true,
+      });
+
+      // loop through each player to see how much they bet (how much they win or lose)
+      let netGainForAnswerer = wasCorrect ? 1000 : 0;
+
+      thisLobby.players.forEach((player) => {
+        // if it's NOT the answerer
+        if (player.socketID !== theAnswerer.displayName) {
+          // they actually made a bet
+          if (player.bet !== 0) {
+            // add/deduct their balance for their bet
+            if (wasCorrect) {
               player.money -= player.bet;
+              netGainForAnswerer += player.bet;
+
               // publicly humiliate them by writing a lobby message declaring how much they lost
               sendMessage(lobbyID, {
-                message: `${thisLobby.game.currentAnswerer.displayName} betted incorrectly! They lost $${player.bet}!`,
+                message: `${player.displayName} bet that ${theAnswerer.displayName} would answer incorrectly but they were wrong! They lost $${player.bet}!`,
                 timestamp: dayjs(),
                 isServer: true,
               });
-              // add to the answerer's balance
-              theAnswerer.money += player.bet;
+            } else {
+              player.money += player.bet;
+              netGainForAnswerer -= player.bet;
+
+              // congratulate them by writing a lobby message declaring how much they won
+              sendMessage(lobbyID, {
+                message: `${player.displayName} bet that ${theAnswerer.displayName} would answer incorrectly and they were right! They won $${player.bet}!`,
+                timestamp: dayjs(),
+                isServer: true,
+              });
             }
+
+            // add / deduct from the answerer's balance
+            theAnswerer.money += netGainForAnswerer;
           }
+        }
+      });
+
+      if (netGainForAnswerer <= 0) {
+        sendMessage(lobbyID, {
+          message: `${theAnswerer.displayName} lost a total of $${Math.abs(
+            netGainForAnswerer
+          )} this round!`,
+          timestamp: dayjs(),
+          isServer: true,
         });
       } else {
-        // if the answerer guessed INCORRECTLY
-        // loop through each player to see how much they bet (how much they earn)
-        thisLobby.players.forEach((player) => {
-          // if it's NOT the answerer
-          if (player.socketID !== theAnswerer.displayName) {
-            if (player.bet !== 0) {
-              // add to their balance for their correct bet
-              player.money += player.bet;
-              // publicly congratulate them by writing a lobby message declaring how much they won
-              sendMessage(lobbyID, {
-                message: `${thisLobby.game.currentAnswerer.displayName} betted correctly! They won $${player.bet}!`,
-                timestamp: dayjs(),
-                isServer: true,
-              });
-              // deduct from the answerer's balance
-              theAnswerer.money -= player.bet;
-            }
-          }
+        sendMessage(lobbyID, {
+          message: `${theAnswerer.displayName} won a total of $${netGainForAnswerer} this round!`,
+          timestamp: dayjs(),
+          isServer: true,
         });
       }
 
