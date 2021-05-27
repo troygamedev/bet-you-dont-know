@@ -1,6 +1,6 @@
 import styles from "./GameScreen.module.scss";
 import { GameStage, Lobby, User } from "@shared/types";
-import { ChangeEvent, useContext, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import SocketContext from "@context/SocketContext";
 
 interface Props {
@@ -20,12 +20,13 @@ const GameScreen: React.FC<Props> = (props) => {
 
   let answeringElem: JSX.Element;
 
-  const onQuestionClick = () => {
-    // socket.emit();
+  const onQuestionClick = (idx: number) => {
+    socket.emit("guessAnswer", props.me, idx);
   };
 
   if (props.lobby.game.gameStage === "Answering") {
     const currentQuestion = props.lobby.game.currentQuestion;
+
     // if it is this player's turn to answer
     if (props.lobby.game.currentAnswerer.socketID === props.me.socketID) {
       answeringElem = (
@@ -35,7 +36,11 @@ const GameScreen: React.FC<Props> = (props) => {
             // render each question (randomized)
             currentQuestion.allChoicesRandomized.map((questionStr, idx) => {
               return (
-                <div key={idx} onClick={() => onQuestionClick()}>
+                <div
+                  key={idx}
+                  onClick={() => onQuestionClick(idx)}
+                  style={{ color: props.me.guessIndex === idx && "orange" }} // mark choice as orange if selected by user
+                >
                   {questionStr}
                 </div>
               );
@@ -71,6 +76,9 @@ const GameScreen: React.FC<Props> = (props) => {
       console.error(err);
     }
   };
+  const submitBet = () => {
+    socket.emit("placeBet", props.me, betValue);
+  };
   if (props.lobby.game.gameStage === "Betting") {
     // if i was not the one who answered
     if (props.lobby.game.currentAnswerer.socketID !== props.me.socketID) {
@@ -90,6 +98,8 @@ const GameScreen: React.FC<Props> = (props) => {
               handleBetValueChange(e);
             }}
           ></input>
+          <button onClick={() => submitBet()}>Confirm bet</button>
+          <p>Your current bet: {props.me.bet}</p>
         </>
       );
     }

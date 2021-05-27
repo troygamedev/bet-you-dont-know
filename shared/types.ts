@@ -11,6 +11,8 @@ export interface User {
   isLeader: boolean;
   isSpectator: boolean;
   money: number;
+  bet: number;
+  guessIndex: number;
 }
 
 export interface ChatMessage {
@@ -52,4 +54,5 @@ export interface TriviaQuestion {
   wrongChoices: Array<string>;
   answer: string;
   allChoicesRandomized: Array<string>;
+  correctAnswerIndex: number;
 }

@@ -74,6 +74,7 @@ const fetchTriviaQuestions = async () => {
         wrongChoices: item.choices,
         answer: item.answer,
         allChoicesRandomized: undefined,
+        correctAnswerIndex: -1,
       });
     });
   } catch (error) {
@@ -204,6 +205,8 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
     isLeader: thisLobby.users.length == 0,
     isSpectator: false,
     money: 1000,
+    bet: 0,
+    guessIndex: -1,
   };
 
   // add them to the user list
@@ -441,6 +444,8 @@ io.on("connection", (socket: Socket) => {
   socket.on("startGame", (lobbyID: string) => {
     const thisLobby = findLobbyWithID(lobbyID);
     thisLobby.isInGame = true;
+    thisLobby.game.roundsCompleted = 0;
+
     // set everyones balance to default 1000
     thisLobby.players.forEach((player) => {
       player.money = 1000;
@@ -497,12 +502,17 @@ io.on("connection", (socket: Socket) => {
         triviaQuestions[randomIndexesArray[thisLobby.game.roundsCompleted]];
       thisLobby.game.currentQuestion = currentQuestion;
 
+      thisLobby.game.currentAnswerer.guessIndex = -1; // reset their guess
+
       // shuffle the choices
       const allChoices = currentQuestion.wrongChoices.concat(
         currentQuestion.answer
       );
       shuffle(allChoices);
       thisLobby.game.currentQuestion.allChoicesRandomized = allChoices;
+      thisLobby.game.currentQuestion.correctAnswerIndex = allChoices.findIndex(
+        (str) => str === currentQuestion.answer
+      );
 
       // start the betting stage after answeringDuration seconds
       const answerDuration = 15;
@@ -513,6 +523,10 @@ io.on("connection", (socket: Socket) => {
 
     const startBettingStage = () => {
       thisLobby.game.gameStage = "Betting";
+      // reset everyone's bets
+      thisLobby.players.forEach((player) => {
+        player.bet = 0;
+      });
 
       // start the reveal stage after bettingDuration seconds
       const bettingDuration = 15;
@@ -523,6 +537,54 @@ io.on("connection", (socket: Socket) => {
 
     const startRevealStage = () => {
       thisLobby.game.gameStage = "Reveal";
+
+      const theAnswerer = thisLobby.game.currentAnswerer;
+
+      // if the answerer guessed correctly
+      if (
+        theAnswerer.guessIndex ===
+        thisLobby.game.currentQuestion.correctAnswerIndex
+      ) {
+        // loop through each player to see how much they bet (how much they lose)
+        thisLobby.players.forEach((player) => {
+          // if it's NOT the answerer
+          if (player.socketID !== theAnswerer.displayName) {
+            if (player.bet !== 0) {
+              // deduct their balance for their incorrect bet
+              player.money -= player.bet;
+              // publicly humiliate them by writing a lobby message declaring how much they lost
+              sendMessage(lobbyID, {
+                message: `${thisLobby.game.currentAnswerer.displayName} betted incorrectly! They lost $${player.bet}!`,
+                timestamp: dayjs(),
+                isServer: true,
+              });
+              // add to the answerer's balance
+              theAnswerer.money += player.bet;
+            }
+          }
+        });
+      } else {
+        // if the answerer guessed INCORRECTLY
+        // loop through each player to see how much they bet (how much they earn)
+        thisLobby.players.forEach((player) => {
+          // if it's NOT the answerer
+          if (player.socketID !== theAnswerer.displayName) {
+            if (player.bet !== 0) {
+              // add to their balance for their correct bet
+              player.money += player.bet;
+              // publicly congratulate them by writing a lobby message declaring how much they won
+              sendMessage(lobbyID, {
+                message: `${thisLobby.game.currentAnswerer.displayName} betted correctly! They won $${player.bet}!`,
+                timestamp: dayjs(),
+                isServer: true,
+              });
+              // deduct from the answerer's balance
+              theAnswerer.money -= player.bet;
+            }
+          }
+        });
+      }
+
       const revealDuration = 8;
       countdown(() => {
         // check if game is over
@@ -540,7 +602,6 @@ io.on("connection", (socket: Socket) => {
 
       // do some resetting
       thisLobby.isInGame = false;
-      thisLobby.game.roundsCompleted = 0;
       // set everyone to unready
       thisLobby.users.forEach((user) => {
         user.isReady = false;
@@ -549,6 +610,26 @@ io.on("connection", (socket: Socket) => {
       // tell everyone in the lobby to update their lobby object
       emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
     };
+  });
+
+  socket.on("guessAnswer", (guesser: User, index: number) => {
+    const thisUser = getUserReference(guesser);
+    const thisLobby = findLobbyWithID(thisUser.lobbyID);
+
+    thisUser.guessIndex = index;
+
+    // tell this user to update their lobby object
+    socket.emit("updateLobby", thisLobby);
+  });
+
+  socket.on("placeBet", (bettor: User, amount: number) => {
+    const thisUser = getUserReference(bettor);
+    const thisLobby = findLobbyWithID(thisUser.lobbyID);
+
+    thisUser.bet = amount;
+
+    // tell this user to update their lobby object
+    socket.emit("updateLobby", thisLobby);
   });
 
   socket.on("leaveLobby", () => {
