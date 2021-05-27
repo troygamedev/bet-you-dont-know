@@ -46,7 +46,7 @@ export interface Game {
   currentAnswerer: User;
   gameStage: GameStage;
   roundsCompleted: number;
-  roundsLimit: number;
+  totalRoundsUntilGameover: number;
 }
 
 export interface TriviaQuestion {

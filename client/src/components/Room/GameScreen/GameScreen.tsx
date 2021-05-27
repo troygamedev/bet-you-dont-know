@@ -79,6 +79,7 @@ const GameScreen: React.FC<Props> = (props) => {
   const submitBet = () => {
     socket.emit("placeBet", props.me, betValue);
   };
+
   if (props.lobby.game.gameStage === "Betting") {
     // if i was not the one who answered
     if (props.lobby.game.currentAnswerer.socketID !== props.me.socketID) {
@@ -108,7 +109,10 @@ const GameScreen: React.FC<Props> = (props) => {
   const gameInfoElem = props.lobby.game.gameStage != "Countdown" && (
     <div>
       <p>{props.lobby.game.gameStage} Phase</p>
-      <p>Round {props.lobby.game.roundsCompleted + 1}</p>
+      <p>
+        Round {props.lobby.game.roundsCompleted + 1} /{" "}
+        {props.lobby.game.totalRoundsUntilGameover}
+      </p>
       <p>
         Currently Answering: {props.lobby.game.currentAnswerer.displayName}{" "}
       </p>

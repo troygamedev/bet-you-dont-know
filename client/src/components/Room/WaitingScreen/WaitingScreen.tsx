@@ -1,6 +1,6 @@
 import SocketContext from "@context/SocketContext";
 import { Lobby, User } from "@shared/types";
-import { useState, useContext } from "react";
+import { useState, useContext, ChangeEvent, useEffect } from "react";
 import Switch from "react-switch";
 
 interface Props {
@@ -93,6 +93,50 @@ const WaitingScreen: React.FC<Props> = (props) => {
       <button onClick={() => onStartPress()}>Start</button>
     );
 
+  const [totalRounds, setTotalRounds] = useState(0);
+
+  const trySetRounds = (num: number) => {
+    console.log(props.lobby.players.length);
+    try {
+      // clamp the rounds between props.lobby.players.length and 10 x that number
+      num = Math.min(
+        Math.max(num, props.lobby.players.length),
+        props.lobby.players.length * 10
+      );
+
+      setTotalRounds(num);
+
+      num *= props.lobby.players.length; // convert from per player -> total rounds
+
+      socket.emit("setTotalRounds", props.lobby.id, num);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  // when the lobby resizes, make sure to update the totalRounds setting
+  useEffect(() => {
+    if (props.lobby.players != undefined) {
+      trySetRounds(props.lobby.players.length * 2);
+    }
+  }, [props.lobby.players]);
+
+  const handleRoundsChange = (e: ChangeEvent<HTMLInputElement>) => {
+    trySetRounds(parseInt(e.target.value));
+  };
+
+  const roundsElem = props.me.isLeader && props.lobby.players && (
+    <div>
+      <label htmlFor="rounds">Number of rounds in total</label>
+      <input
+        type="number"
+        value={totalRounds}
+        min={props.lobby.players.length}
+        max={props.lobby.players.length * 10}
+        onChange={(e) => handleRoundsChange(e)}
+      />
+    </div>
+  );
+
   // PURELY FOR TESTING PURPOSES
   const testingElem = (
     <button onClick={() => onStartPress()}>force start button</button>
@@ -103,6 +147,7 @@ const WaitingScreen: React.FC<Props> = (props) => {
         {testingElem}
         {spectatorSwitch}
         {publicSwitch}
+        {roundsElem}
         <div>
           <h3>Players in {props.lobby.name} </h3>
           {playerList}

@@ -166,7 +166,7 @@ const createLobby = () => {
       currentQuestion: undefined,
       gameStage: "Countdown",
       roundsCompleted: 0,
-      roundsLimit: 3,
+      totalRoundsUntilGameover: 0,
     },
   });
   return randomName;
@@ -360,6 +360,14 @@ io.on("connection", (socket: Socket) => {
         if (user.socketID == thisSocket.id) {
           // remove the user from lobby if the socket id matches
           lobby.users.splice(userIdx, 1);
+
+          // remove the player from the player list (if they are in there)
+          const playerIndex = lobby.players.findIndex(
+            (player) => player.socketID === user.socketID
+          );
+          if (playerIndex !== -1) {
+            lobby.players.splice(playerIndex, 1);
+          }
 
           // give the the next user the lobby leader permission
           if (lobby.users.length > 0) {
@@ -589,7 +597,10 @@ io.on("connection", (socket: Socket) => {
       countdown(() => {
         // check if game is over
         thisLobby.game.roundsCompleted++;
-        if (thisLobby.game.roundsCompleted >= thisLobby.game.roundsLimit) {
+        if (
+          thisLobby.game.roundsCompleted >=
+          thisLobby.game.totalRoundsUntilGameover
+        ) {
           startGameOverStage();
         } else {
           startAnsweringStage();
@@ -630,6 +641,11 @@ io.on("connection", (socket: Socket) => {
 
     // tell this user to update their lobby object
     socket.emit("updateLobby", thisLobby);
+  });
+
+  socket.on("setTotalRounds", (lobbyID: string, rounds: number) => {
+    const thisLobby = findLobbyWithID(lobbyID);
+    thisLobby.game.totalRoundsUntilGameover = rounds;
   });
 
   socket.on("leaveLobby", () => {
