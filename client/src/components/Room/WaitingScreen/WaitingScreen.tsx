@@ -106,8 +106,6 @@ const WaitingScreen: React.FC<Props> = (props) => {
 
       setTotalRounds(num);
 
-      num *= props.lobby.players.length; // convert from per player -> total rounds
-
       socket.emit("setTotalRounds", props.lobby.id, num);
     } catch (err) {
       console.error(err);

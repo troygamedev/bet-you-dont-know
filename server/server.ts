@@ -590,12 +590,12 @@ io.on("connection", (socket: Socket) => {
                 isServer: true,
               });
             }
-
-            // add / deduct from the answerer's balance
-            theAnswerer.money += netGainForAnswerer;
           }
         }
       });
+
+      // add / deduct from the answerer's balance
+      theAnswerer.money += netGainForAnswerer;
 
       if (netGainForAnswerer <= 0) {
         sendMessage(lobbyID, {
