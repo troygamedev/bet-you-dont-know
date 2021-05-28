@@ -1,7 +1,8 @@
 import styles from "./GameScreen.module.scss";
-import { GameStage, Lobby, User } from "@shared/types";
+import { Lobby, User } from "@shared/types";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import SocketContext from "@context/SocketContext";
+import Scoreboard from "./Scoreboard/Scoreboard";
 
 interface Props {
   lobby: Lobby;
@@ -128,6 +129,7 @@ const GameScreen: React.FC<Props> = (props) => {
   const moneyElem = <div>Your balance: ${props.me.money}</div>;
   return (
     <div>
+      <Scoreboard lobby={props.lobby} me={props.me} />
       {gameInfoElem}
       {countdownElem}
       {moneyElem}

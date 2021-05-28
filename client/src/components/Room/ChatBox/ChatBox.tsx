@@ -33,29 +33,43 @@ const ChatBox: React.FC<Props> = (props) => {
 
   return (
     <div className={styles.container}>
-      {props.chatList.map((msg, idx) => {
-        // first check if the message is sent after the user joined (prevent them from seeing past messages)
-        // users can see past 10 seconds of messages
-        if (dayjs(msg.timestamp).isAfter(timeOfJoin.subtract(10, "seconds"))) {
-          if (msg.isServer) {
+      <div className={styles.messagesContainer}>
+        {props.chatList.map((msg, idx) => {
+          // first check if the message is sent after the user joined (prevent them from seeing past messages)
+          // users can see past 10 seconds of messages
+          if (
+            dayjs(msg.timestamp).isAfter(timeOfJoin.subtract(10, "seconds"))
+          ) {
+            // server message
+            if (msg.isServer) {
+              return (
+                <div key={idx} className={styles.message}>
+                  <div className={styles.serverMessage}>{msg.message}</div>
+                </div>
+              );
+            }
+
+            // user message
+            const oddEvenStyle =
+              idx % 2 == 0 ? styles.oddLine : styles.evenLine;
             return (
-              <div key={idx}>
-                <strong>{msg.message}</strong>
+              <div
+                key={idx}
+                className={`${styles.messageRow} ${styles.userMessage} ${oddEvenStyle}`}
+              >
+                <div className={styles.sender}>
+                  {(msg.user.isLeader ? "[LEADER] " : "") +
+                    msg.user.displayName +
+                    (props.sender.socketID == socket.id && " (You)") +
+                    ": "}
+                </div>
+                <div className={styles.messageContent}>{msg.message}</div>
               </div>
             );
           }
-          return (
-            <div key={idx}>
-              {(msg.user.isLeader ? "[LEADER] " : "") +
-                msg.user.displayName +
-                (props.sender.socketID == socket.id && " (You)") +
-                ": " +
-                msg.message}
-            </div>
-          );
-        }
-      })}
-      <div>
+        })}
+      </div>
+      <div className={styles.inputContainer}>
         <input
           type="text"
           name="chat"

@@ -18,7 +18,7 @@ export interface User {
 export interface ChatMessage {
   isServer?: boolean;
   user?: User;
-  message: string;
+  message: JSX.Element;
   timestamp: dayjs.Dayjs;
 }
 

@@ -233,13 +233,14 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
 const MAX_CHAT_MESSAGES = 15;
 const sendMessage = (lobbyID: string, msg: ChatMessage) => {
   const thisLobby = findLobbyWithID(lobbyID);
+  if (thisLobby != undefined) {
+    //send a chat message
+    thisLobby.chatMessages.push(msg);
 
-  //send a chat message
-  thisLobby.chatMessages.push(msg);
-
-  // make sure the number of chat messages don't exceed the limit
-  if (thisLobby.chatMessages.length > MAX_CHAT_MESSAGES) {
-    thisLobby.chatMessages.shift();
+    // make sure the number of chat messages don't exceed the limit
+    if (thisLobby.chatMessages.length > MAX_CHAT_MESSAGES) {
+      thisLobby.chatMessages.shift();
+    }
   }
 };
 // helper function that emits an event to the user as well as everyone in the lobby
@@ -676,12 +677,12 @@ io.on("connection", (socket: Socket) => {
   });
 });
 
-// app.use(
-//   express.static(path.join(__dirname, "../client/out"), {
-//     // index: false,
-//     extensions: ["html"],
-//   })
-// );
+app.use(
+  express.static(path.join(__dirname, "../client/out"), {
+    // index: false,
+    extensions: ["html"],
+  })
+);
 
 app.get("/lobby/:lobbyID", (req, res) => {
   const filePath = "[slug].html";

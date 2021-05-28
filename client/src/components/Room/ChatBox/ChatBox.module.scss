@@ -1,6 +1,42 @@
 .container {
   width: 90%;
   max-width: 400px;
-  height: 400px;
-  border: 1px solid red;
+  height: 90vh;
+  max-height: 400px;
+  border: 1px solid green;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+
+  .messagesContainer {
+    border: 1px solid blue;
+    flex-grow: 20;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    .messageRow {
+      .sender,
+      .messageContent {
+        width: fit-content;
+        display: inline-block;
+        padding: 4px;
+      }
+      .sender {
+        font-weight: bold;
+      }
+      .messageContent {
+      }
+    }
+    .oddLine {
+      background-color: rgb(61, 61, 61);
+    }
+    .evenLine {
+      background-color: rgb(41, 40, 40);
+    }
+  }
+
+  .inputContainer {
+    flex-grow: 1;
+    border: 1px solid red;
+  }
 }
