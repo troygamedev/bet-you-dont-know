@@ -96,7 +96,6 @@ const WaitingScreen: React.FC<Props> = (props) => {
   const [totalRounds, setTotalRounds] = useState(0);
 
   const trySetRounds = (num: number) => {
-    console.log(props.lobby.players.length);
     try {
       // clamp the rounds between props.lobby.players.length and 10 x that number
       num = Math.min(

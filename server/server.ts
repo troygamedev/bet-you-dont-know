@@ -218,7 +218,7 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
   thisSocket.join(thisLobby.id);
 
   sendMessage(thisLobby.id, {
-    message: "Someone has joined and is picking their username right now...",
+    message: "Someone has connected... picking their username right now...",
     timestamp: dayjs(),
     isServer: true,
   });

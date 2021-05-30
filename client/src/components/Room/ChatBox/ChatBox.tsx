@@ -2,7 +2,7 @@ import styles from "./ChatBox.module.scss";
 import SocketContext from "@context/SocketContext";
 import { ChatMessage, User } from "@shared/types";
 import dayjs from "dayjs";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 
 interface Props {
   sender: User;
@@ -14,10 +14,25 @@ const ChatBox: React.FC<Props> = (props) => {
   const socket = useContext(SocketContext);
 
   const [messageText, setMessageText] = useState("");
+  const [placeholderText, setPlaceholderText] = useState("Send Message...");
+
+  const slowmodeDuration = 0;
+  const [timeOfLastMessage, setTimeOfLastMessage] = useState(Date.now());
 
   const sendMessage = () => {
-    socket.emit("sendMessage", props.lobbyID, messageText, props.sender);
-    setMessageText("");
+    // check if the message is empty
+    if (messageText != "") {
+      // prevent spamming with slowmode
+      if (Date.now() - timeOfLastMessage < 1000 * slowmodeDuration) {
+        setPlaceholderText(
+          `Please wait ${slowmodeDuration} seconds between each message`
+        );
+      } else {
+        setTimeOfLastMessage(Date.now());
+        socket.emit("sendMessage", props.lobbyID, messageText, props.sender);
+        setMessageText("");
+      }
+    }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -34,46 +49,54 @@ const ChatBox: React.FC<Props> = (props) => {
   return (
     <div className={styles.container}>
       <div className={styles.messagesContainer}>
-        {props.chatList.map((msg, idx) => {
-          // first check if the message is sent after the user joined (prevent them from seeing past messages)
-          // users can see past 10 seconds of messages
-          if (
-            dayjs(msg.timestamp).isAfter(timeOfJoin.subtract(10, "seconds"))
-          ) {
-            // server message
-            if (msg.isServer) {
+        <div className={styles.messagesWrapper}>
+          {props.chatList.map((msg, idx) => {
+            // first check if the message is sent after the user joined (prevent them from seeing past messages)
+            // users can see past 10 seconds of messages
+            if (
+              dayjs(msg.timestamp).isAfter(timeOfJoin.subtract(10, "seconds"))
+            ) {
+              const oddEvenStyle =
+                idx % 2 == 0 ? styles.oddLine : styles.evenLine;
+
+              // server message
+              if (msg.isServer) {
+                return (
+                  <div
+                    key={idx}
+                    className={`${styles.messageRow} ${styles.serverMessage} ${oddEvenStyle}`}
+                  >
+                    <div className={styles.messageContent}>{msg.message}</div>
+                  </div>
+                );
+              }
+
+              // user message
               return (
-                <div key={idx} className={styles.message}>
-                  <div className={styles.serverMessage}>{msg.message}</div>
+                <div
+                  key={idx}
+                  className={`${styles.messageRow} ${styles.userMessage} ${oddEvenStyle} `}
+                >
+                  <div className={styles.sender}>
+                    {(msg.user.isLeader ? "[LEADER] " : "") +
+                      msg.user.displayName +
+                      ": "}
+                  </div>
+                  <div className={styles.messageContent}>{msg.message}</div>
                 </div>
               );
             }
-
-            // user message
-            const oddEvenStyle =
-              idx % 2 == 0 ? styles.oddLine : styles.evenLine;
-            return (
-              <div
-                key={idx}
-                className={`${styles.messageRow} ${styles.userMessage} ${oddEvenStyle}`}
-              >
-                <div className={styles.sender}>
-                  {(msg.user.isLeader ? "[LEADER] " : "") +
-                    msg.user.displayName +
-                    (props.sender.socketID == socket.id && " (You)") +
-                    ": "}
-                </div>
-                <div className={styles.messageContent}>{msg.message}</div>
-              </div>
-            );
-          }
-        })}
+          })}
+        </div>
       </div>
       <div className={styles.inputContainer}>
         <input
           type="text"
           name="chat"
+          className={styles.chatInputBox}
           value={messageText}
+          maxLength={100}
+          placeholder={placeholderText}
           onChange={(e) => setMessageText(e.target.value)}
           onKeyDown={(e) => handleKeyDown(e)}
         />
