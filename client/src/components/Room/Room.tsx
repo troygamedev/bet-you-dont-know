@@ -55,6 +55,20 @@ const Room: React.FC = () => {
       setUsername();
     }
   };
+
+  // alert the user when they try to leave the page
+  useEffect(() => {
+    window.addEventListener("beforeunload", alertUser);
+    return () => {
+      window.removeEventListener("beforeunload", alertUser);
+    };
+  }, []);
+
+  const alertUser = (e) => {
+    e.preventDefault();
+    e.returnValue = "";
+  };
+
   if (lobby && me) {
     const namePickElem = me.hasSetName || (
       <div>
@@ -113,7 +127,7 @@ const Room: React.FC = () => {
     );
 
     return (
-      <Layout title={lobby.name ? lobby.name : "Loading..."}>
+      <Layout title={lobby.name ? lobby.name : "Loading..."} alertLeave>
         {me.hasSetName && (
           <ChatBox
             sender={me}

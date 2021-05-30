@@ -7,6 +7,7 @@ import styles from "./Layout.module.scss";
 
 interface Props {
   title: string;
+  alertLeave?: boolean;
 }
 
 const Layout: React.FC<Props> = (props) => {
@@ -26,7 +27,7 @@ const Layout: React.FC<Props> = (props) => {
         <title>{props.title}</title>
       </Head>
       <main className={styles.main}>
-        <Header headerText="Bet You Don't Know" />
+        <Header headerText="Bet You Don't Know" alertLeave={props.alertLeave} />
         {isConnected ? props.children : "Loading..."}
       </main>
       <Footer />

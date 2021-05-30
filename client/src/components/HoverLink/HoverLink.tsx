@@ -3,6 +3,7 @@ import Link from "next/link";
 interface Props {
   children;
   href: string;
+  active?: boolean;
 }
 
 const HoverLink: React.FC<Props> = (props) => {
@@ -11,7 +12,11 @@ const HoverLink: React.FC<Props> = (props) => {
   };
   return (
     <div style={myStyle}>
-      <Link href={props.href}>{props.children}</Link>
+      {props.active ? (
+        <Link href={props.href}>{props.children}</Link>
+      ) : (
+        props.children
+      )}
     </div>
   );
 };
