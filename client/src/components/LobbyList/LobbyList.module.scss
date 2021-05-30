@@ -1,0 +1,40 @@
+.container {
+  width: 90%;
+  max-width: 400px;
+  margin: auto;
+
+  .lobbyCountLabel {
+    margin: 20px;
+  }
+
+  .publicLobbyList {
+    width: 100%;
+    .labelRow,
+    .lobbyItem {
+      display: grid;
+      grid-template-columns: 50% 40% 10%;
+      text-align: left;
+      margin: 10px;
+    }
+
+    .labelRow {
+      font-weight: bold;
+      text-decoration: underline;
+      .lobbyNameLabel {
+      }
+      .playerCountLabel {
+      }
+    }
+
+    .lobbyItem {
+      .lobbyName {
+      }
+
+      .playerCount {
+      }
+    }
+  }
+
+  .createButtonLobby {
+  }
+}

@@ -63,6 +63,7 @@ const Room: React.FC = () => {
           type="text"
           name="username"
           value={usernameBox}
+          maxLength={20}
           onChange={(e) => {
             setUsernameBox(e.target.value);
           }}

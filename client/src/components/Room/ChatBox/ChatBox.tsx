@@ -14,20 +14,16 @@ const ChatBox: React.FC<Props> = (props) => {
   const socket = useContext(SocketContext);
 
   const [messageText, setMessageText] = useState("");
-  const [placeholderText, setPlaceholderText] = useState("Send Message...");
 
-  const slowmodeDuration = 0;
+  const slowmodeDuration = 1;
   const [timeOfLastMessage, setTimeOfLastMessage] = useState(Date.now());
 
   const sendMessage = () => {
     // check if the message is empty
-    if (messageText != "") {
+    if (messageText.trim() != "") {
       // prevent spamming with slowmode
-      if (Date.now() - timeOfLastMessage < 1000 * slowmodeDuration) {
-        setPlaceholderText(
-          `Please wait ${slowmodeDuration} seconds between each message`
-        );
-      } else {
+      const secondsSinceLastMessage = (Date.now() - timeOfLastMessage) / 1000;
+      if (secondsSinceLastMessage >= slowmodeDuration) {
         setTimeOfLastMessage(Date.now());
         socket.emit("sendMessage", props.lobbyID, messageText, props.sender);
         setMessageText("");
@@ -96,7 +92,7 @@ const ChatBox: React.FC<Props> = (props) => {
           className={styles.chatInputBox}
           value={messageText}
           maxLength={100}
-          placeholder={placeholderText}
+          placeholder={"Send Message"}
           onChange={(e) => setMessageText(e.target.value)}
           onKeyDown={(e) => handleKeyDown(e)}
         />

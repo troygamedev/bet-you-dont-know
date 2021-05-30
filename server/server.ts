@@ -231,8 +231,16 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
 };
 
 const MAX_CHAT_MESSAGES = 15;
+
+const Filter = require("bad-words"),
+  filter = new Filter();
+
 const sendMessage = (lobbyID: string, msg: ChatMessage) => {
   const thisLobby = findLobbyWithID(lobbyID);
+
+  // profanity filter
+  msg.message = filter.clean(msg.message);
+
   if (thisLobby != undefined) {
     //send a chat message
     thisLobby.chatMessages.push(msg);
