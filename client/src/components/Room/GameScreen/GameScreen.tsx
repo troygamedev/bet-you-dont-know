@@ -28,7 +28,7 @@ const GameScreen: React.FC<Props> = (props) => {
 
   if (props.lobby.game.gameStage === "Answering") {
     const currentQuestion = props.lobby.game.currentQuestion;
-
+    console.log(props.me.guessIndex);
     answeringElem = (
       <div className={styles.answeringContainer}>
         <div className={styles.question}>{currentQuestion.question}</div>

@@ -10,7 +10,7 @@ const Scoreboard: React.FC<Props> = (props) => {
   // copy the players array
   const rankings = [...props.lobby.players];
   // sort the players by money
-  rankings.sort((a, b) => a.money - b.money);
+  rankings.sort((a, b) => b.money - a.money);
 
   return (
     <div className={styles.container}>

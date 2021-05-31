@@ -211,7 +211,11 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
   // add them to the user list
   thisLobby.users.push(newUser);
   // add them to the players list
-  thisLobby.players.push(newUser);
+  if (!thisLobby.isInGame) {
+    thisLobby.players.push(newUser);
+  } else {
+    newUser.isSpectator = true;
+  }
 
   // subscribe them to the corresponding lobby room
   thisSocket.join(thisLobby.id);
