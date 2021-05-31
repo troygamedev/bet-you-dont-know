@@ -1,0 +1,44 @@
+.upper {
+  display: flex;
+  justify-content: space-between;
+  .money {
+    font-size: larger;
+    color: #fac610;
+    margin: auto;
+  }
+  .gameInfo {
+    margin: auto;
+  }
+
+  .scoreboard {
+    margin: 20px auto;
+  }
+}
+
+.lower {
+  .answeringContainer {
+    margin-top: 80px;
+    .question {
+      font-size: x-large;
+      margin-bottom: 20px;
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: 40% 40%;
+      margin: auto;
+      justify-content: center;
+      .choice {
+        cursor: pointer;
+        padding: 20px 10px;
+        border: 1px solid;
+      }
+      .answering {
+        // border: 1px solid;
+      }
+    }
+    .timeBar {
+      width: 80%;
+      margin: auto;
+    }
+  }
+}

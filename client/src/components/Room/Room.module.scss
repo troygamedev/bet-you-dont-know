@@ -1,0 +1,17 @@
+@import "@styles/variables";
+.container {
+  display: flex;
+  justify-content: center;
+  // border: 1px solid red;
+  width: 99%;
+  height: 80vh;
+  margin: auto;
+  .screen {
+    width: 75%;
+    border: 3px solid $primary;
+  }
+  .chat {
+    width: 25%;
+    height: 100%;
+  }
+}

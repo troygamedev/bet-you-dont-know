@@ -1,4 +1,5 @@
 import { Lobby, User } from "@shared/types";
+import styles from "./Scoreboard.module.scss";
 
 interface Props {
   lobby: Lobby;
@@ -12,15 +13,22 @@ const Scoreboard: React.FC<Props> = (props) => {
   rankings.sort((a, b) => a.money - b.money);
 
   return (
-    <div>
-      <div>Scoreboard</div>
-      {rankings.map((player, idx) => {
-        return (
-          <div key={idx}>
-            {idx + 1}. {player.displayName}: ${player.money}
-          </div>
-        );
-      })}
+    <div className={styles.container}>
+      <div className={styles.label}>Scoreboard</div>
+      <div className={styles.list}>
+        {rankings.map((player, idx) => {
+          return (
+            <div
+              key={idx}
+              className={`${styles.row} ${
+                idx % 2 == 0 ? styles.evenRow : styles.oddRow
+              }`}
+            >
+              {idx + 1}. {player.displayName}: ${player.money}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -1,0 +1,35 @@
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .settings {
+    display: flex;
+    flex-direction: row;
+    width: 60%;
+    margin: auto;
+    justify-content: space-evenly;
+
+    .lobbySettings,
+    .userSettings {
+      .label {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+
+      .settingsRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        min-width: 200px;
+        margin-top: 10px;
+      }
+      label {
+        margin-right: 20px;
+      }
+    }
+    .lobbySettings {
+    }
+    .userSettings {
+    }
+  }
+}

@@ -1,23 +1,33 @@
+@import "@styles/variables";
+
 .container {
-  width: 90%;
-  max-width: 400px;
-  height: 90vh;
-  max-height: 400px;
+  width: 100%;
+  height: 99%;
   text-align: left;
   display: flex;
   flex-direction: column;
-  border: 2px solid rgb(173, 163, 163);
-  background-color: rgb(41, 40, 40);
+  border: 3px solid $primary;
+  background-color: $secondary;
+
+  .chatLabel {
+    text-align: center;
+    background-color: $primary;
+    padding: 5px;
+    font-weight: bold;
+    z-index: 1;
+    flex-basis: 5%;
+  }
 
   .messagesContainer {
-    flex-grow: 25;
     display: flex;
     flex-direction: column-reverse;
     justify-content: flex-start;
-    overflow-y: scroll;
+    flex-basis: 90%;
+    overflow-y: auto;
 
     .messagesWrapper {
       flex-direction: column-reverse;
+
       .messageRow {
         .sender,
         .messageContent {
@@ -35,19 +45,19 @@
         }
       }
       .oddLine {
-        background-color: rgb(61, 61, 61);
+        background-color: $tertiary;
       }
       .evenLine {
-        background-color: rgb(41, 40, 40);
+        background-color: $secondary;
       }
     }
   }
 
   .inputContainer {
-    flex-grow: 1;
+    flex-basis: 5%;
     .chatInputBox {
       width: 98%;
-      height: 90%;
+      height: 100%;
     }
   }
 }

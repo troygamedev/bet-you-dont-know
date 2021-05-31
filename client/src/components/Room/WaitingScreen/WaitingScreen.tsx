@@ -2,6 +2,7 @@ import SocketContext from "@context/SocketContext";
 import { Lobby, User } from "@shared/types";
 import { useState, useContext, ChangeEvent, useEffect } from "react";
 import Switch from "react-switch";
+import styles from "./WaitingScreen.module.scss";
 
 interface Props {
   me: User;
@@ -48,7 +49,7 @@ const WaitingScreen: React.FC<Props> = (props) => {
     setIsSpectator(!isSpectator);
   };
   const spectatorSwitch = (
-    <label htmlFor="spectator or not spectator">
+    <label htmlFor="spectator or not spectator" className={styles.settingsRow}>
       <span>Spectator?</span>
       <Switch onChange={() => handleSpectatorChange()} checked={isSpectator} />
     </label>
@@ -57,22 +58,17 @@ const WaitingScreen: React.FC<Props> = (props) => {
   const [isPublicLobby, setIsPublicLobby] = useState(false);
 
   const handlePublicChange = () => {
-    socket.emit("setLobbyPublic", props.me.lobbyID, !isPublicLobby);
-    setIsPublicLobby(!isPublicLobby);
+    if (props.me.isLeader) {
+      socket.emit("setLobbyPublic", props.me.lobbyID, !isPublicLobby);
+      setIsPublicLobby(!isPublicLobby);
+    }
   };
   const publicSwitch = (
     <div>
-      {props.me.isLeader && (
-        <div>
-          <label htmlFor="public or private lobby">
-            <span>Make lobby public</span>
-            <Switch
-              onChange={() => handlePublicChange()}
-              checked={isPublicLobby}
-            />
-          </label>
-        </div>
-      )}
+      <label htmlFor="public or private lobby" className={styles.settingsRow}>
+        <span>Make lobby public</span>
+        <Switch onChange={() => handlePublicChange()} checked={isPublicLobby} />
+      </label>
     </div>
   );
 
@@ -121,8 +117,8 @@ const WaitingScreen: React.FC<Props> = (props) => {
     trySetRounds(parseInt(e.target.value));
   };
 
-  const roundsElem = props.me.isLeader && props.lobby.players && (
-    <div>
+  const roundsElem = props.lobby.players && (
+    <div className={styles.settingsRow}>
       <label htmlFor="rounds">Number of rounds in total</label>
       <input
         type="number"
@@ -130,28 +126,43 @@ const WaitingScreen: React.FC<Props> = (props) => {
         min={props.lobby.players.length}
         max={props.lobby.players.length * 10}
         onChange={(e) => handleRoundsChange(e)}
+        readOnly={!props.me.isLeader}
       />
     </div>
   );
 
   // PURELY FOR TESTING PURPOSES
   const testingElem = (
-    <button onClick={() => onStartPress()}>force start button</button>
+    <div>
+      {props.me.isLeader && (
+        <button onClick={() => onStartPress()}>force start button</button>
+      )}
+    </div>
   );
   return (
     props.me.hasSetName && (
-      <>
-        {testingElem}
-        {spectatorSwitch}
-        {publicSwitch}
-        {roundsElem}
+      <div className={styles.container}>
         <div>
           <h3>Players in {props.lobby.name} </h3>
           {playerList}
           {readyElem}
           {startElem}
         </div>
-      </>
+        <div className={styles.settings}>
+          {props.me.isLeader && (
+            <div className={styles.lobbySettings}>
+              <div className={styles.label}>Lobby Settings:</div>
+              {/* {testingElem} */}
+              {publicSwitch}
+              {roundsElem}
+            </div>
+          )}
+          <div className={styles.userSettings}>
+            <div className={styles.label}>User Settings:</div>
+            {spectatorSwitch}
+          </div>
+        </div>
+      </div>
     )
   );
 };

@@ -3,13 +3,12 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
+import { ChatMessage, Lobby, User, TriviaQuestion } from "@shared/types";
 import {
-  ChatMessage,
-  Lobby,
-  User,
-  TriviaQuestion,
-  GameStage,
-} from "@shared/types";
+  answeringDuration,
+  bettingDuration,
+  revealDuration,
+} from "../shared/globalVariables";
 
 import dayjs from "dayjs";
 import fetch from "node-fetch";
@@ -230,7 +229,7 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
   io.emit("updatePublicLobbyList", getPublicLobbies());
 };
 
-const MAX_CHAT_MESSAGES = 15;
+const MAX_CHAT_MESSAGES = 30;
 
 const Filter = require("bad-words"),
   filter = new Filter();
@@ -478,7 +477,15 @@ io.on("connection", (socket: Socket) => {
       const tick = () => {
         // if the countdown is finished
         if (thisLobby.game.timeLeft <= 0) {
-          callbackWhenComplete();
+          // make sure this game is still ongoing (if the lobby is gone or if all players left, end the game)
+          if (
+            findLobbyWithID(lobbyID) != undefined &&
+            thisLobby.players.length > 0
+          ) {
+            callbackWhenComplete();
+          } else {
+            startGameOverStage();
+          }
         } else {
           thisLobby.game.timeLeft--;
 
@@ -532,10 +539,9 @@ io.on("connection", (socket: Socket) => {
       );
 
       // start the betting stage after answeringDuration seconds
-      const answerDuration = 15;
       countdown(() => {
         startBettingStage();
-      }, answerDuration);
+      }, answeringDuration);
     };
 
     const startBettingStage = () => {
@@ -546,7 +552,6 @@ io.on("connection", (socket: Socket) => {
       });
 
       // start the reveal stage after bettingDuration seconds
-      const bettingDuration = 15;
       countdown(() => {
         startRevealStage();
       }, bettingDuration);
@@ -622,7 +627,6 @@ io.on("connection", (socket: Socket) => {
         });
       }
 
-      const revealDuration = 8;
       countdown(() => {
         // check if game is over
         thisLobby.game.roundsCompleted++;
@@ -674,7 +678,9 @@ io.on("connection", (socket: Socket) => {
 
   socket.on("setTotalRounds", (lobbyID: string, rounds: number) => {
     const thisLobby = findLobbyWithID(lobbyID);
-    thisLobby.game.totalRoundsUntilGameover = rounds;
+    if (thisLobby != undefined) {
+      thisLobby.game.totalRoundsUntilGameover = rounds;
+    }
   });
 
   socket.on("leaveLobby", () => {

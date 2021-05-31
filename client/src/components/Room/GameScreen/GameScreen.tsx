@@ -3,6 +3,8 @@ import { Lobby, User } from "@shared/types";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import SocketContext from "@context/SocketContext";
 import Scoreboard from "./Scoreboard/Scoreboard";
+import ProgressBar from "@ramonak/react-progress-bar";
+import { answeringDuration } from "@shared/globalVariables";
 
 interface Props {
   lobby: Lobby;
@@ -12,33 +14,35 @@ interface Props {
 const GameScreen: React.FC<Props> = (props) => {
   const socket = useContext(SocketContext);
 
-  const countdownElem =
-    props.lobby.game.gameStage === "Countdown" ? (
-      <div>Game starting in {props.lobby.game.timeLeft}</div>
-    ) : (
-      <div>Time remaining: {props.lobby.game.timeLeft}</div>
-    );
-
+  const countdownElem = props.lobby.game.gameStage === "Countdown" && (
+    <div>Game starting in {props.lobby.game.timeLeft}</div>
+  );
   let answeringElem: JSX.Element;
 
   const onQuestionClick = (idx: number) => {
-    socket.emit("guessAnswer", props.me, idx);
+    // if it is this player's turn to answer
+    if (props.lobby.game.currentAnswerer.socketID === props.me.socketID) {
+      socket.emit("guessAnswer", props.me, idx);
+    }
   };
 
   if (props.lobby.game.gameStage === "Answering") {
     const currentQuestion = props.lobby.game.currentQuestion;
 
-    // if it is this player's turn to answer
-    if (props.lobby.game.currentAnswerer.socketID === props.me.socketID) {
-      answeringElem = (
-        <div>
-          <h3>{currentQuestion.question}</h3>
+    answeringElem = (
+      <div className={styles.answeringContainer}>
+        <div className={styles.question}>{currentQuestion.question}</div>
+        <div className={styles.choices}>
           {
             // render each question (randomized)
             currentQuestion.allChoicesRandomized.map((questionStr, idx) => {
               return (
                 <div
                   key={idx}
+                  className={`${styles.choice} ${
+                    props.lobby.game.currentAnswerer.socketID ===
+                      props.me.socketID && styles.answering
+                  }`}
                   onClick={() => onQuestionClick(idx)}
                   style={{ color: props.me.guessIndex === idx && "orange" }} // mark choice as orange if selected by user
                 >
@@ -48,20 +52,19 @@ const GameScreen: React.FC<Props> = (props) => {
             })
           }
         </div>
-      );
-    } else {
-      answeringElem = (
         <div>
-          <h3>{currentQuestion.question}</h3>
-          {
-            // render each question (randomized)
-            currentQuestion.allChoicesRandomized.map((questionStr, idx) => {
-              return <div key={idx}>{questionStr}</div>;
-            })
-          }
+          <div className={styles.timeBar}>
+            <ProgressBar
+              completed={(props.lobby.game.timeLeft / answeringDuration) * 100}
+              transitionDuration={"0.5s"}
+              isLabelVisible={false}
+              bgColor={"#db8acb"}
+            />
+          </div>
+          <div>Time remaining: {props.lobby.game.timeLeft}</div>
         </div>
-      );
-    }
+      </div>
+    );
   }
   let bettingElem = <></>;
   const [betValue, setBetValue] = useState(0);
@@ -115,26 +118,37 @@ const GameScreen: React.FC<Props> = (props) => {
   }
 
   const gameInfoElem = props.lobby.game.gameStage != "Countdown" && (
-    <div>
+    <div className={styles.gameInfo}>
       <p>{props.lobby.game.gameStage} Phase</p>
       <p>
         Round {props.lobby.game.roundsCompleted + 1} /{" "}
         {props.lobby.game.totalRoundsUntilGameover}
       </p>
       <p>
-        Currently Answering: {props.lobby.game.currentAnswerer.displayName}{" "}
+        Currently Answering:{" "}
+        {props.lobby.game.currentAnswerer.socketID === props.me.socketID
+          ? "YOU"
+          : props.lobby.game.currentAnswerer.displayName}
       </p>
     </div>
   );
-  const moneyElem = <div>Your balance: ${props.me.money}</div>;
+  const moneyElem = (
+    <div className={styles.money}>Your balance: ${props.me.money}</div>
+  );
   return (
     <div>
-      <Scoreboard lobby={props.lobby} me={props.me} />
-      {gameInfoElem}
       {countdownElem}
-      {moneyElem}
-      {answeringElem}
-      {bettingElem}
+      <div className={styles.upper}>
+        {moneyElem}
+        {gameInfoElem}
+        <div className={styles.scoreboard}>
+          <Scoreboard lobby={props.lobby} me={props.me} />
+        </div>
+      </div>
+      <div className={styles.lower}>
+        {answeringElem}
+        {bettingElem}
+      </div>
     </div>
   );
 };

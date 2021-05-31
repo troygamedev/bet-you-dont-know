@@ -6,6 +6,7 @@ import swal from "sweetalert";
 import ChatBox from "./ChatBox/ChatBox";
 import GameScreen from "./GameScreen/GameScreen";
 import WaitingScreen from "./WaitingScreen/WaitingScreen";
+import styles from "./Room.module.scss";
 
 const Room: React.FC = () => {
   const socket = useContext(SocketContext);
@@ -40,7 +41,7 @@ const Room: React.FC = () => {
   const [usernameBox, setUsernameBox] = useState("");
 
   const setUsername = () => {
-    if (usernameBox == "") {
+    if (usernameBox.trim() == "") {
       swal({
         title: "Invalid Username",
         text: "Please enter a valid username.",
@@ -58,10 +59,12 @@ const Room: React.FC = () => {
 
   // alert the user when they try to leave the page
   useEffect(() => {
-    window.addEventListener("beforeunload", alertUser);
-    return () => {
-      window.removeEventListener("beforeunload", alertUser);
-    };
+    if (process.env.NODE_ENV === "production") {
+      window.addEventListener("beforeunload", alertUser);
+      return () => {
+        window.removeEventListener("beforeunload", alertUser);
+      };
+    }
   }, []);
 
   const alertUser = (e) => {
@@ -128,17 +131,19 @@ const Room: React.FC = () => {
 
     return (
       <Layout title={lobby.name ? lobby.name : "Loading..."} alertLeave>
-        {me.hasSetName && (
-          <ChatBox
-            sender={me}
-            lobbyID={lobby.id}
-            chatList={lobby.chatMessages}
-          />
-        )}
         {namePickElem}
-        {screenElem}
-        <br />
-        <br />
+        <div className={styles.container}>
+          <div className={styles.screen}>{screenElem}</div>
+          <div className={styles.chat}>
+            {me.hasSetName && (
+              <ChatBox
+                sender={me}
+                lobbyID={lobby.id}
+                chatList={lobby.chatMessages}
+              />
+            )}
+          </div>
+        </div>
         {rulesElem}
       </Layout>
     );

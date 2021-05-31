@@ -15,7 +15,7 @@ const ChatBox: React.FC<Props> = (props) => {
 
   const [messageText, setMessageText] = useState("");
 
-  const slowmodeDuration = 1;
+  const slowmodeDuration = 0.5;
   const [timeOfLastMessage, setTimeOfLastMessage] = useState(Date.now());
 
   const sendMessage = () => {
@@ -44,6 +44,7 @@ const ChatBox: React.FC<Props> = (props) => {
 
   return (
     <div className={styles.container}>
+      <div className={styles.chatLabel}>Chat</div>
       <div className={styles.messagesContainer}>
         <div className={styles.messagesWrapper}>
           {props.chatList.map((msg, idx) => {

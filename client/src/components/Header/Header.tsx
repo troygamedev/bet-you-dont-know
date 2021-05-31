@@ -38,15 +38,17 @@ const Header: React.FC<Props> = (props) => {
   };
   return (
     <div onClick={(e) => handleClick(e)}>
-      <HoverLink href={"/"} active={!props.alertLeave}>
-        <div className={styles.container}>
-          <img src="/img/logo.svg" alt="logo" className={styles.logoImg} />
-          <div className={styles.text}>
-            <h1>{props.headerText}</h1>
-            <h2>a simple multiplayer game of wits, deception, and bets!</h2>
+      <div className={styles.container}>
+        <HoverLink href={"/"} active={!props.alertLeave}>
+          <div className={styles.wrapper}>
+            <img src="/img/logo.svg" alt="logo" className={styles.logoImg} />
+            <div className={styles.text}>
+              <h1>{props.headerText}</h1>
+              {/* <h2>a simple multiplayer game of wits, deception, and bets!</h2> */}
+            </div>
           </div>
-        </div>
-      </HoverLink>
+        </HoverLink>
+      </div>
     </div>
   );
 };

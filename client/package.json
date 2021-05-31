@@ -9,6 +9,7 @@
     "export": "yarn build && next export"
   },
   "dependencies": {
+    "@ramonak/react-progress-bar": "^3.1.0",
     "axios": "^0.21.1",
     "next": "10.0.4",
     "react": "17.0.1",

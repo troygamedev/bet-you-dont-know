@@ -14,5 +14,7 @@
     "paths": {
       "@shared/*": ["../shared/*"]
     }
-  }
+  },
+  "include": ["**/*.ts", "../shared/test.ts"],
+  "exclude": ["node_modules"]
 }
