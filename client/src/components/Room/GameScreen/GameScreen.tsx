@@ -28,7 +28,8 @@ const GameScreen: React.FC<Props> = (props) => {
 
   if (props.lobby.game.gameStage === "Answering") {
     const currentQuestion = props.lobby.game.currentQuestion;
-    console.log(props.me.guessIndex);
+    const amCurrentlyAnswering =
+      props.lobby.game.currentAnswerer.socketID === props.me.socketID;
     answeringElem = (
       <div className={styles.answeringContainer}>
         <div className={styles.question}>{currentQuestion.question}</div>
@@ -40,11 +41,15 @@ const GameScreen: React.FC<Props> = (props) => {
                 <div
                   key={idx}
                   className={`${styles.choice} ${
-                    props.lobby.game.currentAnswerer.socketID ===
-                      props.me.socketID && styles.answering
+                    amCurrentlyAnswering && styles.answering
                   }`}
                   onClick={() => onQuestionClick(idx)}
-                  style={{ color: props.me.guessIndex === idx && "orange" }} // mark choice as orange if selected by user
+                  style={{
+                    color:
+                      amCurrentlyAnswering &&
+                      props.me.guessIndex === idx &&
+                      "orange",
+                  }} // mark choice as orange if selected by user
                 >
                   {questionStr}
                 </div>
