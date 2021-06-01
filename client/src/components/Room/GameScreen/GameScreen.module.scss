@@ -3,21 +3,32 @@
   height: 100%;
   .upper {
     height: 40%;
-    display: flex;
-    justify-content: space-between;
-    .money {
-      display: flex;
-      font-size: larger;
-      color: $coin;
-      margin: auto;
-      height: 30px;
-    }
-    .gameInfo {
-      margin: auto;
-    }
+    position: relative;
 
     .scoreboard {
+      position: absolute;
+      left: 40px;
+      width: 25%;
       margin: 20px auto;
+    }
+
+    .notScoreboard {
+      margin-left: 40%; // make room for scoreboard
+      display: flex;
+      .money {
+        display: flex;
+        font-size: larger;
+        color: $coin;
+        margin: auto;
+        height: 30px;
+        border: 1px solid;
+        padding: 10px 30px 10px 15px;
+        border-radius: 10px;
+      }
+      .gameInfo {
+        margin-top: 20px;
+        margin: auto;
+      }
     }
   }
 

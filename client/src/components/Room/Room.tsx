@@ -8,6 +8,8 @@ import GameScreen from "./GameScreen/GameScreen";
 import WaitingScreen from "./WaitingScreen/WaitingScreen";
 import styles from "./Room.module.scss";
 import { useRouter } from "next/router";
+import { Button } from "react-bootstrap-buttons";
+import "react-bootstrap-buttons/dist/react-bootstrap-buttons.css";
 
 const Room: React.FC = () => {
   const socket = useContext(SocketContext);
@@ -104,6 +106,13 @@ const Room: React.FC = () => {
           }}
           onKeyDown={(e) => handleKeyDown(e)}
         />
+        <Button
+          btnStyle="primary"
+          className={styles.namePickButton}
+          onClick={() => setUsername()}
+        >
+          Confirm
+        </Button>
       </div>
     );
     const screenElem = lobby.isInGame ? (

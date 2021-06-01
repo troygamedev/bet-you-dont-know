@@ -17,7 +17,7 @@ const GameScreen: React.FC<Props> = (props) => {
     <div>Game starting in {props.lobby.game.timeLeft}</div>
   );
 
-  const gameInfoElem = props.lobby.game.gameStage != "Countdown" && (
+  const gameInfoElem = (
     <div className={styles.gameInfo}>
       <p>{props.lobby.game.gameStage} Phase</p>
       <p>
@@ -39,8 +39,10 @@ const GameScreen: React.FC<Props> = (props) => {
         <div className={styles.scoreboard}>
           <Scoreboard lobby={props.lobby} me={props.me} />
         </div>
-        {gameInfoElem}
-        {moneyElem}
+        <div className={styles.notScoreboard}>
+          {gameInfoElem}
+          {moneyElem}
+        </div>
       </div>
       <div className={styles.lower}>
         <div className={styles.mid}>
@@ -52,7 +54,9 @@ const GameScreen: React.FC<Props> = (props) => {
             !props.me.isSpectator && (
               <Betting lobby={props.lobby} me={props.me} />
             )}
-          {props.lobby.game.gameStage === "Reveal" && <Reveal />}
+          {props.lobby.game.gameStage === "Reveal" && (
+            <Reveal lobby={props.lobby} me={props.me} />
+          )}
         </div>
         <div className={styles.bottom}>
           {props.lobby.isInGame && <TimeRemainingBar lobby={props.lobby} />}

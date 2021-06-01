@@ -12,17 +12,25 @@
     display: flex;
     margin: 10px auto;
     height: 50px;
+    width: 90%;
+    justify-content: center;
     .betInput {
       font-size: larger;
       width: 100px;
     }
-    .betButton {
-      width: 50%;
-      margin: auto;
+    .betsPresetsButtons {
+      margin-left: 5px;
+      display: flex;
     }
   }
+  .betButton {
+    width: 30%;
+    margin: auto;
+  }
   .currentBet {
-    font-size: larger;
+    font-size: x-large;
+    border-bottom: 1px solid;
+    padding: 10px 20px;
     display: flex;
     align-items: center;
     margin: 20px auto;

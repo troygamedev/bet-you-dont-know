@@ -65,13 +65,39 @@ const Betting: React.FC<Props> = (props) => {
             }}
             className={styles.betInput}
           ></input>
+          <div className={styles.betsPresetsButtons}>
+            <Button
+              btnStyle="success"
+              onClick={() => {
+                setBetValue(0);
+              }}
+            >
+              Zero
+            </Button>
+            <Button
+              btnStyle="success"
+              onClick={() => {
+                setBetValue(props.me.money / 2);
+              }}
+            >
+              Half
+            </Button>
+            <Button
+              btnStyle="success"
+              onClick={() => {
+                setBetValue(props.me.money);
+              }}
+            >
+              All In
+            </Button>
+          </div>
         </div>
         <Button
           btnStyle="primary"
           onClick={() => submitBet()}
           className={styles.betButton}
         >
-          Confirm bet
+          Confirm Bet
         </Button>
       </div>
     );

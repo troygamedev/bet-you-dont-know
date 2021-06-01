@@ -41,9 +41,10 @@
   .readyContainer {
     width: 100%;
     max-width: 400px;
-    margin: 10px auto;
+    margin: 20px auto 0;
     .waitingFor {
       margin-top: 15px;
+      font-style: italic;
     }
   }
   .startButton {

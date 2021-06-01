@@ -100,17 +100,17 @@ const WaitingScreen: React.FC<Props> = (props) => {
         <div>
           {!props.me.isSpectator && (
             <Button
-              btnStyle={isReady ? "danger" : "success"}
+              btnStyle={isReady ? "danger" : "primary"}
               onClick={() => onReadyPress()}
             >
-              {isReady ? "Click to Unready" : "Ready"}
+              {isReady ? "Click to Unready" : "Click to Ready"}
             </Button>
           )}
 
           <div className={styles.waitingFor}>
             {everyoneHasReadied
-              ? "Waiting for lobby leader to start the game."
-              : "Waiting for all players to ready up."}
+              ? "Waiting for lobby leader to start the game..."
+              : "Waiting for all players to ready up..."}
           </div>
         </div>
       ) : (

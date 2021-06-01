@@ -3,7 +3,13 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
-import { ChatMessage, Lobby, User, TriviaQuestion } from "@shared/types";
+import {
+  ChatMessage,
+  Lobby,
+  User,
+  TriviaQuestion,
+  RevealResult,
+} from "@shared/types";
 import {
   answeringDuration,
   bettingDuration,
@@ -167,6 +173,7 @@ const createLobby = () => {
       gameStage: "Countdown",
       roundsCompleted: 0,
       totalRoundsUntilGameover: 0,
+      revealResults: [],
     },
   });
   return randomName;
@@ -382,7 +389,7 @@ io.on("connection", (socket: Socket) => {
             lobby.players.splice(playerIndex, 1);
           }
 
-          // give the the next user the lobby leader permission
+          // give the next user the lobby leader permission
           if (lobby.users.length > 0) {
             lobby.users[0].isLeader = true;
           }
@@ -566,72 +573,55 @@ io.on("connection", (socket: Socket) => {
     const startRevealStage = () => {
       thisLobby.game.gameStage = "Reveal";
 
+      // logs every gain and loss, will be displayed on everyone's screen
+      let revealResults: Array<RevealResult> = [];
+
+      // adds a new entry into revealResults if this user doesnt exist in the logs yet; updates the entry if they do
+      // also actually adds / subtracts from their balance
+      const logGain = (who: User, amount: number) => {
+        who.money += amount;
+
+        // find this user in the revealResults
+        const thisUserIndex = revealResults.findIndex(
+          (result) => result.who.socketID === who.socketID
+        );
+        if (thisUserIndex === -1) {
+          revealResults.push({ who: who, netGain: amount });
+        } else {
+          revealResults[thisUserIndex].netGain += amount;
+        }
+      };
+
       const theAnswerer = thisLobby.game.currentAnswerer;
 
       // if the answerer guessed correctly
       let wasCorrect =
         theAnswerer.guessIndex ===
         thisLobby.game.currentQuestion.correctAnswerIndex;
-      sendMessage(lobbyID, {
-        message: `${theAnswerer.displayName} answered ${
-          wasCorrect ? "correctly!" : "incorrectly!"
-        }!`,
-        timestamp: dayjs(),
-        isServer: true,
-      });
 
+      if (wasCorrect) {
+        logGain(theAnswerer, 1000);
+      }
       // loop through each player to see how much they bet (how much they win or lose)
-      let netGainForAnswerer = wasCorrect ? 1000 : 0;
 
       thisLobby.players.forEach((player) => {
         // if it's NOT the answerer
         if (player.socketID !== theAnswerer.displayName) {
           // they actually made a bet
           if (player.bet !== 0) {
-            // add/deduct their balance for their bet
+            // add / deduct their balance for their bet
             if (wasCorrect) {
-              player.money -= player.bet;
-              netGainForAnswerer += player.bet;
-
-              // publicly humiliate them by writing a lobby message declaring how much they lost
-              sendMessage(lobbyID, {
-                message: `${player.displayName} bet that ${theAnswerer.displayName} would answer incorrectly but they were wrong! They lost $${player.bet}!`,
-                timestamp: dayjs(),
-                isServer: true,
-              });
+              logGain(player, -player.bet);
+              logGain(theAnswerer, player.bet);
             } else {
-              player.money += player.bet;
-              netGainForAnswerer -= player.bet;
-
-              // congratulate them by writing a lobby message declaring how much they won
-              sendMessage(lobbyID, {
-                message: `${player.displayName} bet that ${theAnswerer.displayName} would answer incorrectly and they were right! They won $${player.bet}!`,
-                timestamp: dayjs(),
-                isServer: true,
-              });
+              logGain(player, player.bet);
+              logGain(theAnswerer, -player.bet);
             }
           }
         }
       });
 
-      // add / deduct from the answerer's balance
-      theAnswerer.money += netGainForAnswerer;
-
-      if (netGainForAnswerer <= 0) {
-        sendMessage(lobbyID, {
-          message: `${theAnswerer.displayName} lost a total of $${Math.abs(
-            netGainForAnswerer
-          )} this round!`,
-          timestamp: dayjs(),
-          isServer: true,
-        });
-      } else {
-        sendMessage(lobbyID, {
-          message: `${theAnswerer.displayName} won a total of $${netGainForAnswerer} this round!`,
-          timestamp: dayjs(),
-          isServer: true,
-        });
-      }
+      thisLobby.game.revealResults = revealResults;
 
       countdown(() => {
         // check if game is over

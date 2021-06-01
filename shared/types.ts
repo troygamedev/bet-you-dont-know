@@ -39,7 +39,6 @@ export type GameStage =
   | "Betting"
   | "Reveal"
   | "GameOver";
-
 export interface Game {
   timeLeft: number;
   fullTimeDuration: number;
@@ -48,6 +47,12 @@ export interface Game {
   gameStage: GameStage;
   roundsCompleted: number;
   totalRoundsUntilGameover: number;
+  revealResults: Array<RevealResult>;
+}
+
+export interface RevealResult {
+  who: User;
+  netGain: number;
 }
 
 export interface TriviaQuestion {
