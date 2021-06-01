@@ -53,7 +53,7 @@ const Betting: React.FC<Props> = (props) => {
           <InlineCoin width="20px" sideMargins="0 5px" />
         </div>
         <div className={styles.betRow}>
-          <InlineCoin width="auto" sideMargins="0 10px" />
+          <InlineCoin width="40px" sideMargins="0 10px" />
           <input
             type="number"
             min={0}
