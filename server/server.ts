@@ -621,6 +621,9 @@ io.on("connection", (socket: Socket) => {
         }
       });
 
+      // sort the results
+      revealResults.sort((a, b) => b.netGain - a.netGain);
+
       thisLobby.game.revealResults = revealResults;
 
       countdown(() => {

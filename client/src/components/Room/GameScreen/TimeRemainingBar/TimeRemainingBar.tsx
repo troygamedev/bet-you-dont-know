@@ -19,6 +19,7 @@ const TimeRemainingBar: React.FC<Props> = (props) => {
           isLabelVisible={false}
           // bgColor={percentRemaining < 0.2 ? "red" : "#db8acb"}
           bgColor={percentRemaining < 0.3 ? "red" : "#dbb35c"}
+          height="100%"
         />
       </div>
       <div className={styles.timeRemainingLabel}>

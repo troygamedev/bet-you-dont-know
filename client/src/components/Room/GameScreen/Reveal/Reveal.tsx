@@ -1,6 +1,8 @@
+import InlineCoin from "@components/InlineCoin/InlineCoin";
 import SocketContext from "@context/SocketContext";
 import { Lobby, User } from "@shared/types";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
+import styles from "./Reveal.module.scss";
 
 interface Props {
   lobby: Lobby;
@@ -8,7 +10,6 @@ interface Props {
 }
 
 const Reveal: React.FC<Props> = (props) => {
-  const socket = useContext(SocketContext);
   const currentQuestion = props.lobby.game.currentQuestion;
   const currentAnswerer = props.lobby.game.currentAnswerer;
   let guessedChoice: string;
@@ -24,23 +25,53 @@ const Reveal: React.FC<Props> = (props) => {
     currentQuestion.correctAnswerIndex === currentAnswerer.guessIndex;
 
   return (
-    <div>
-      <div>The question: {currentQuestion.question}</div>
-      <div>
-        {currentAnswerer.displayName} guessed: {guessedChoice}
+    <div className={styles.container}>
+      <div className={styles.question}>
+        The question: {currentQuestion.question}
       </div>
-      <div>
-        {currentAnswerer.displayName} was{" "}
-        {wasCorrect ? "correct!" : "incorrect!"}
+      <div className={styles.guess}>
+        {currentAnswerer.displayName} guessed: {guessedChoice} and was
+        <div
+          style={{
+            color: wasCorrect ? "lime" : "red",
+            display: "inline",
+          }}
+        >
+          {wasCorrect ? " correct!" : " incorrect!"}
+        </div>
       </div>
-      <div>
-        {props.lobby.game.revealResults.map((result) => {
-          return (
-            <div>
-              {result.who.displayName}: {result.netGain}
-            </div>
-          );
-        })}
+      <div className={styles.explanation}>
+        {wasCorrect
+          ? +` ${currentAnswerer.displayName} earns $1000 for answering correctly and also receives everyone's incorrect bets!`
+          : `The answer was ${currentQuestion.answer}. ${currentAnswerer.displayName} must pay everyone who betted against them for answering incorrectly!`}
+      </div>
+      <div className={styles.revealListContainer}>
+        <div className={styles.revealListLabel}>Earnings and Losses:</div>
+        <div className={styles.scrollable}>
+          {props.lobby.game.revealResults.map((result, idx) => {
+            return (
+              <div
+                className={`${styles.row} ${
+                  idx % 2 == 0 ? styles.evenRow : styles.oddRow
+                }`}
+                key={idx}
+              >
+                {result.who.displayName}:
+                <div className={styles.numberWrapper}>
+                  <div
+                    className={styles.number}
+                    style={{
+                      color: result.netGain > 0 ? "lime" : "red",
+                    }}
+                  >
+                    {(result.netGain > 0 && "+") + result.netGain}
+                    <InlineCoin width="15px" sideMargins="0 4px" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

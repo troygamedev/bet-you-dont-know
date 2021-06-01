@@ -1,0 +1,55 @@
+@import "@styles/variables";
+
+.container {
+  .question {
+    font-size: larger;
+  }
+  .guess {
+    font-size: larger;
+  }
+  .explanation {
+  }
+  .revealListContainer {
+    border: 3px solid $primary;
+    width: 100%;
+    max-width: 300px;
+    margin: 20px auto;
+    background-color: $primary;
+
+    .revealListLabel {
+      margin: 5px 0;
+      font-weight: bold;
+      font-size: large;
+    }
+
+    .scrollable {
+      overflow-y: auto;
+      height: 150px;
+      background-color: $secondary;
+      overflow-x: hidden;
+      .row {
+        width: 100%;
+        word-wrap: break-word;
+        padding: 3px 0px;
+        .numberWrapper {
+          display: inline-block;
+          margin: auto;
+          margin-left: 5px;
+          width: fit-content;
+          .number {
+            display: flex;
+            width: fit-content;
+            margin: auto;
+          }
+        }
+      }
+
+      .evenRow {
+        background-color: $secondary;
+      }
+      .oddRow {
+        background-color: $tertiary;
+      }
+    }
+  }
+}
