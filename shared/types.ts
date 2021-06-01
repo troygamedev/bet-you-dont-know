@@ -13,6 +13,7 @@ export interface User {
   money: number;
   bet: number;
   guessIndex: number;
+  wantsToSkip: boolean;
 }
 
 export interface ChatMessage {

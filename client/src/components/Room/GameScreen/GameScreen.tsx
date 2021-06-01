@@ -6,6 +6,7 @@ import Betting from "./Betting/Betting";
 import TimeRemainingBar from "./TimeRemainingBar/TimeRemainingBar";
 import Reveal from "./Reveal/Reveal";
 import InlineCoin from "@components/InlineCoin/InlineCoin";
+import SkipButton from "./SkipButton/SkipButton";
 
 interface Props {
   lobby: Lobby;
@@ -59,7 +60,14 @@ const GameScreen: React.FC<Props> = (props) => {
           )}
         </div>
         <div className={styles.bottom}>
-          {props.lobby.isInGame && <TimeRemainingBar lobby={props.lobby} />}
+          {props.lobby.isInGame && (
+            <>
+              <TimeRemainingBar lobby={props.lobby} />
+              <div className={styles.skipButton}>
+                <SkipButton lobby={props.lobby} me={props.me} />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -45,6 +45,12 @@
       bottom: 10px;
       width: 100%;
       height: 20%;
+
+      .skipButton {
+        position: absolute;
+        top: 0px;
+        right: 25px;
+      }
     }
   }
 }

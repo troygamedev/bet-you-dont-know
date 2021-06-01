@@ -214,6 +214,7 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
     money: 1000,
     bet: 0,
     guessIndex: -1,
+    wantsToSkip: false,
   };
 
   // add them to the user list
@@ -316,7 +317,7 @@ io.on("connection", (socket: Socket) => {
 
   const getUserReference = (user: User) => {
     // find the user in the lobby user list
-    if (user == null) return null;
+    if (user == undefined) return null;
     const thisLobby = findLobbyWithID(user.lobbyID);
     return thisLobby.users.find(
       (thisUser) => thisUser.socketID == user.socketID
@@ -484,12 +485,21 @@ io.on("connection", (socket: Socket) => {
       thisLobby.game.timeLeft = duration;
       thisLobby.game.fullTimeDuration = duration;
 
+      // reset everyones vote to skip to false
+      thisLobby.players.forEach((player) => {
+        player.wantsToSkip = false;
+      });
+
       // tell everyone in the lobby to update their lobby object
       emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
 
       const tick = () => {
-        // if the countdown is finished
-        if (thisLobby.game.timeLeft <= 0) {
+        // if the countdown is finished or if everyone wants to skip
+        const everyoneWantsToSkip =
+          thisLobby.players.filter((p) => p.wantsToSkip).length ===
+          thisLobby.players.length;
+
+        if (thisLobby.game.timeLeft <= 0 || everyoneWantsToSkip) {
           // make sure this game is still ongoing (if the lobby is gone or if all players left, end the game)
           if (
             findLobbyWithID(lobbyID) != undefined &&
@@ -680,6 +690,13 @@ io.on("connection", (socket: Socket) => {
     if (thisLobby != undefined) {
       thisLobby.game.totalRoundsUntilGameover = rounds;
     }
+  });
+
+  socket.on("wantSkip", (who: User) => {
+    const thisUser = getUserReference(who);
+    const thisLobby = findLobbyWithID(thisUser.lobbyID);
+    thisUser.wantsToSkip = true;
+    emitLobbyEvent(socket, thisLobby.id, "updateLobby", thisLobby);
   });
 
   socket.on("leaveLobby", () => {
