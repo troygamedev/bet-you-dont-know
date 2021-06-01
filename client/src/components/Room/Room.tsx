@@ -1,15 +1,17 @@
 import Layout from "@components/Layout/Layout";
 import SocketContext from "@context/SocketContext";
 import { Lobby, User } from "@shared/types";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import swal from "sweetalert";
 import ChatBox from "./ChatBox/ChatBox";
 import GameScreen from "./GameScreen/GameScreen";
 import WaitingScreen from "./WaitingScreen/WaitingScreen";
 import styles from "./Room.module.scss";
+import { useRouter } from "next/router";
 
 const Room: React.FC = () => {
   const socket = useContext(SocketContext);
+  const router = useRouter();
 
   const [lobby, setLobby] = useState<Lobby>();
 
@@ -23,6 +25,9 @@ const Room: React.FC = () => {
         title: "Error",
         text: message,
         icon: "error",
+      }).then(() => {
+        // redirect to homepage
+        router.push("/");
       });
     });
     return () => {
@@ -72,13 +77,26 @@ const Room: React.FC = () => {
     e.returnValue = "";
   };
 
+  const outputLinkRef = useRef(null);
+  const [isCopied, setIsCopied] = useState(false);
+  const onClipboard = (e) => {
+    outputLinkRef.current.select();
+    document.execCommand("copy");
+    e.target.focus();
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 3000);
+  };
+
   if (lobby && me) {
     const namePickElem = me.hasSetName || (
-      <div>
-        <div>Enter your Username</div>
+      <div className={styles.namePickContainer}>
+        <label className={styles.namePickLabel}>Enter your Nickname</label>
         <input
           type="text"
           name="username"
+          className={styles.namePickInput}
           value={usernameBox}
           maxLength={20}
           onChange={(e) => {
@@ -129,22 +147,52 @@ const Room: React.FC = () => {
       </div>
     );
 
+    const linkShareElem = (
+      <div className={styles.linkShareContainer}>
+        <label className={styles.label}>Invite your friends by sharing:</label>
+        <div className={styles.linkShareRow}>
+          <input
+            type="text"
+            onFocus={(e) => e.target.select()}
+            className={styles.outputLink}
+            ref={outputLinkRef}
+            value={window.location.href}
+            readOnly
+          />
+          <div className={styles.clipboardAndAlert}>
+            {isCopied && <div className={styles.copiedAlert}>Copied!</div>}
+            <button
+              className={styles.clipboardButton}
+              onClick={(e) => onClipboard(e)}
+            >
+              <img src="../../img/clipboard.png"></img>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
     return (
       <Layout title={lobby.name ? lobby.name : "Loading..."} alertLeave>
         {namePickElem}
-        <div className={styles.container}>
-          <div className={styles.screen}>{screenElem}</div>
-          <div className={styles.chat}>
-            {me.hasSetName && (
-              <ChatBox
-                sender={me}
-                lobbyID={lobby.id}
-                chatList={lobby.chatMessages}
-              />
-            )}
-          </div>
-        </div>
-        {rulesElem}
+        {me.hasSetName && (
+          <>
+            <div className={styles.container}>
+              <div className={styles.screen}>{screenElem}</div>
+              <div className={styles.chat}>
+                {me.hasSetName && (
+                  <ChatBox
+                    sender={me}
+                    lobbyID={lobby.id}
+                    chatList={lobby.chatMessages}
+                  />
+                )}
+              </div>
+            </div>
+            {linkShareElem}
+            {rulesElem}
+          </>
+        )}
       </Layout>
     );
   }

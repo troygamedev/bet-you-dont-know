@@ -1,6 +1,6 @@
 @import "@styles/variables";
 .container {
-  width: 200px;
+  width: 300px;
   height: 200px;
   border: 3px solid $primary;
   background-color: $secondary;
@@ -12,10 +12,30 @@
   }
 
   .list {
-    height: 70%;
+    height: 90%;
+    width: 100%;
     overflow-y: auto;
+    overflow-x: hidden;
     .row {
+      width: 99%;
       padding: 2px;
+      .name {
+        display: inline-block;
+        word-wrap: break-word;
+        margin-right: 3px;
+        width: fit-content;
+        max-width: 100%;
+      }
+      .numberWrapper {
+        display: inline-block;
+        margin: auto;
+        width: fit-content;
+        .number {
+          display: flex;
+          width: fit-content;
+          margin: auto;
+        }
+      }
     }
     .evenRow {
       background-color: $secondary;

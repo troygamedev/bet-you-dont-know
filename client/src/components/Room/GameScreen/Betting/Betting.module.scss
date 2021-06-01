@@ -1,0 +1,32 @@
+@import "@styles/variables";
+
+.bettingContainer {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  margin: auto;
+  .betLabel {
+    font-size: larger;
+  }
+  .betRow {
+    display: flex;
+    margin: 10px auto;
+    height: 50px;
+    .betInput {
+      font-size: larger;
+      width: 100px;
+    }
+    .betButton {
+      width: 50%;
+      margin: auto;
+    }
+  }
+  .currentBet {
+    font-size: larger;
+    display: flex;
+    align-items: center;
+    margin: 20px auto;
+    height: 20px;
+    color: $coin;
+  }
+}

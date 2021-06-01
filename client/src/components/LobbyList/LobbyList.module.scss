@@ -15,6 +15,7 @@
       grid-template-columns: 50% 40% 10%;
       text-align: left;
       margin: 10px;
+      align-items: center;
     }
 
     .labelRow {
@@ -32,9 +33,15 @@
 
       .playerCount {
       }
+
+      .joinButton {
+        text-align: center;
+        min-width: 60px;
+      }
     }
   }
 
-  .createButtonLobby {
+  .createLobbyButton {
+    margin-top: 200px;
   }
 }

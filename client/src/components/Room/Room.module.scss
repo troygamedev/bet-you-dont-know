@@ -1,9 +1,26 @@
 @import "@styles/variables";
+.namePickContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 300px;
+  margin: auto;
+  .namePickLabel {
+    font-size: larger;
+    margin-bottom: 20px;
+  }
+  .namePickInput {
+    max-width: 200px;
+    margin: auto;
+    height: 25px;
+  }
+}
+
 .container {
   display: flex;
   justify-content: center;
   // border: 1px solid red;
-  width: 99%;
+  width: 90%;
   height: 80vh;
   margin: auto;
   .screen {
@@ -13,5 +30,51 @@
   .chat {
     width: 25%;
     height: 100%;
+  }
+}
+.linkShareContainer {
+  width: 90%;
+  max-width: 500px;
+  margin: 20px auto;
+
+  .label {
+    display: block;
+    font-size: large;
+    margin: 10px;
+  }
+
+  .linkShareRow {
+    display: flex;
+    align-items: center;
+    margin: auto;
+    justify-content: center;
+    .outputLink {
+      vertical-align: middle;
+      line-height: 30px;
+      height: 30px;
+      text-align: center;
+      resize: none;
+      width: 90%;
+      color: #00e;
+    }
+
+    .clipboardAndAlert {
+      position: relative;
+      .clipboardButton {
+        margin-left: 4px;
+        width: 40px;
+        img {
+          width: 100%;
+        }
+      }
+      .copiedAlert {
+        background-color: #77dd77;
+        border-radius: 5px;
+        padding: 3px 10px;
+        position: absolute;
+        bottom: 40px;
+        left: -30%;
+      }
+    }
   }
 }

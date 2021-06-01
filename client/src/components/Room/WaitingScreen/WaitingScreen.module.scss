@@ -1,7 +1,56 @@
+@import "@styles/variables";
+
 .container {
   height: 100%;
   display: flex;
   flex-direction: column;
+
+  .playerListContainer {
+    border: 3px solid $primary;
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+    background-color: $primary;
+
+    .playerListLabel {
+      margin: 5px 0;
+      font-weight: bold;
+      font-size: large;
+    }
+
+    .scrollable {
+      overflow-y: auto;
+      height: 150px;
+      background-color: $secondary;
+      overflow-x: hidden;
+      .row {
+        width: 100%;
+        word-wrap: break-word;
+        padding: 3px 0px;
+      }
+
+      .evenRow {
+        background-color: $secondary;
+      }
+      .oddRow {
+        background-color: $tertiary;
+      }
+    }
+  }
+
+  .readyContainer {
+    width: 100%;
+    max-width: 400px;
+    margin: 10px auto;
+    .waitingFor {
+      margin-top: 15px;
+    }
+  }
+  .startButton {
+    width: 20%;
+    margin: auto;
+  }
+
   .settings {
     display: flex;
     flex-direction: row;

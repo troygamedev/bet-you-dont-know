@@ -42,6 +42,7 @@ export type GameStage =
 
 export interface Game {
   timeLeft: number;
+  fullTimeDuration: number;
   currentQuestion: TriviaQuestion;
   currentAnswerer: User;
   gameStage: GameStage;

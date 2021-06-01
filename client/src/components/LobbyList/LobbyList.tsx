@@ -3,6 +3,8 @@ import { useState, useEffect, useContext } from "react";
 import { Lobby } from "@shared/types";
 import styles from "./LobbyList.module.scss";
 import { useRouter } from "next/router";
+import { Button } from "react-bootstrap-buttons";
+import "react-bootstrap-buttons/dist/react-bootstrap-buttons.css";
 
 const LobbyList: React.FC = () => {
   const socket = useContext(SocketContext);
@@ -52,24 +54,28 @@ const LobbyList: React.FC = () => {
                     <div className={styles.playerCount}>
                       {lobby.users.length}
                     </div>
-                    <button
+                    <Button
+                      sm
+                      btnStyle="primary"
                       onClick={() => {
                         onJoinLobbyClick(lobby.id);
                       }}
+                      className={styles.joinButton}
                     >
                       Join
-                    </button>
+                    </Button>
                   </div>
                 );
               })}
             </div>
           )}
-          <button
+          <Button
+            sm
             className={styles.createLobbyButton}
             onClick={() => onCreateLobbyClick()}
           >
             Create new lobby
-          </button>
+          </Button>
         </div>
       )}
     </>

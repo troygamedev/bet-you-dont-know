@@ -161,6 +161,7 @@ const createLobby = () => {
     isInGame: false,
     game: {
       timeLeft: 0,
+      fullTimeDuration: answeringDuration,
       currentAnswerer: undefined,
       currentQuestion: undefined,
       gameStage: "Countdown",
@@ -474,6 +475,7 @@ io.on("connection", (socket: Socket) => {
     // countdown until timeLeft hits 0
     const countdown = (callbackWhenComplete: () => void, duration: number) => {
       thisLobby.game.timeLeft = duration;
+      thisLobby.game.fullTimeDuration = duration;
 
       // tell everyone in the lobby to update their lobby object
       emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);

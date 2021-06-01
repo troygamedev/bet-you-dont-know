@@ -1,3 +1,4 @@
+import InlineCoin from "@components/InlineCoin/InlineCoin";
 import { Lobby, User } from "@shared/types";
 import styles from "./Scoreboard.module.scss";
 
@@ -24,7 +25,17 @@ const Scoreboard: React.FC<Props> = (props) => {
                 idx % 2 == 0 ? styles.evenRow : styles.oddRow
               }`}
             >
-              {idx + 1}. {player.displayName}: ${player.money}
+              <div className={styles.wrapper}>
+                <div className={styles.name}>
+                  {idx + 1}. {player.displayName}:
+                </div>
+                <div className={styles.numberWrapper}>
+                  <div className={styles.number}>
+                    {player.money}
+                    <InlineCoin width="15px" sideMargins="0 4px" />
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })}

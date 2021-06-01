@@ -1,44 +1,39 @@
-.upper {
-  display: flex;
-  justify-content: space-between;
-  .money {
-    font-size: larger;
-    color: #fac610;
-    margin: auto;
-  }
-  .gameInfo {
-    margin: auto;
+@import "@styles/variables";
+.container {
+  height: 100%;
+  .upper {
+    height: 40%;
+    display: flex;
+    justify-content: space-between;
+    .money {
+      display: flex;
+      font-size: larger;
+      color: $coin;
+      margin: auto;
+      height: 30px;
+    }
+    .gameInfo {
+      margin: auto;
+    }
+
+    .scoreboard {
+      margin: 20px auto;
+    }
   }
 
-  .scoreboard {
-    margin: 20px auto;
-  }
-}
-
-.lower {
-  .answeringContainer {
-    margin-top: 80px;
-    .question {
-      font-size: x-large;
-      margin-bottom: 20px;
+  .lower {
+    position: relative;
+    height: 60%;
+    .mid {
+      height: 80%;
+      margin-top: 20px;
     }
-    .choices {
-      display: grid;
-      grid-template-columns: 40% 40%;
-      margin: auto;
-      justify-content: center;
-      .choice {
-        cursor: pointer;
-        padding: 20px 10px;
-        border: 1px solid;
-      }
-      .answering {
-        // border: 1px solid;
-      }
-    }
-    .timeBar {
-      width: 80%;
-      margin: auto;
+    .bottom {
+      // anchored to the bottom
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      height: 20%;
     }
   }
 }

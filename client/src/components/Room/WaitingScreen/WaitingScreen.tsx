@@ -3,6 +3,8 @@ import { Lobby, User } from "@shared/types";
 import { useState, useContext, ChangeEvent, useEffect } from "react";
 import Switch from "react-switch";
 import styles from "./WaitingScreen.module.scss";
+import { Button } from "react-bootstrap-buttons";
+import "react-bootstrap-buttons/dist/react-bootstrap-buttons.css";
 
 interface Props {
   me: User;
@@ -21,26 +23,35 @@ const WaitingScreen: React.FC<Props> = (props) => {
     socket.emit("startGame", props.lobby.id);
   };
 
-  const playerList =
-    props.lobby.users &&
-    props.lobby.users.map((user, idx) => {
-      return (
-        <div>
-          <p
-            key={idx}
-            style={{
-              color:
-                (user.isReady && "lime") || (user.isSpectator && "lightblue"),
-            }}
-          >
-            {(user.isLeader ? "[LEADER] " : "") +
-              user.displayName +
-              (user.socketID == socket.id ? " (You) " : " ") +
-              (user.isSpectator ? "[Spectator]" : "")}
-          </p>
-        </div>
-      );
-    });
+  const playerList = props.lobby.users && (
+    <div className={styles.playerListContainer}>
+      <div className={styles.playerListLabel}>
+        Players: {props.lobby.players.length}
+      </div>
+      <div className={styles.scrollable}>
+        {props.lobby.users.map((user, idx) => {
+          return (
+            <div
+              className={`${styles.row} ${
+                idx % 2 == 0 ? styles.evenRow : styles.oddRow
+              }`}
+              key={idx}
+              style={{
+                color:
+                  (user.isReady && "#24e046") ||
+                  (user.isSpectator && "lightblue"),
+              }}
+            >
+              {(user.isLeader ? "[LEADER] " : "") +
+                user.displayName +
+                (user.socketID == socket.id ? " (You) " : " ") +
+                (user.isSpectator ? "[Spectator]" : "")}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   const [isSpectator, setIsSpectator] = useState(false);
 
@@ -48,6 +59,12 @@ const WaitingScreen: React.FC<Props> = (props) => {
     socket.emit("setIsSpectator", props.me, !isSpectator);
     setIsSpectator(!isSpectator);
   };
+
+  useEffect(() => {
+    if (props.me.isSpectator) {
+      setIsSpectator(props.me.isSpectator);
+    }
+  }, [props.me.isSpectator]);
   const spectatorSwitch = (
     <label htmlFor="spectator or not spectator" className={styles.settingsRow}>
       <span>Spectator?</span>
@@ -72,22 +89,48 @@ const WaitingScreen: React.FC<Props> = (props) => {
     </div>
   );
 
-  const readyElem =
-    props.lobby.players && props.lobby.players.length >= 2 ? (
-      <button onClick={() => onReadyPress()}>Ready</button>
-    ) : (
-      <div>
-        {2 - props.lobby.players.length} or more players are required to start
-        this game
-      </div>
-    );
-
-  const startElem = props.me.isLeader &&
+  const everyoneHasReadied =
     props.lobby.players &&
     props.lobby.players.length >= 2 &&
-    !props.lobby.players.find((user) => !user.isReady) && (
-      <button onClick={() => onStartPress()}>Start</button>
-    );
+    !props.lobby.players.find((user) => !user.isReady);
+
+  const readyElem = (
+    <div className={styles.readyContainer}>
+      {props.lobby.players && props.lobby.players.length >= 2 ? (
+        <div>
+          {!props.me.isSpectator && (
+            <Button
+              btnStyle={isReady ? "danger" : "success"}
+              onClick={() => onReadyPress()}
+            >
+              {isReady ? "Click to Unready" : "Ready"}
+            </Button>
+          )}
+
+          <div className={styles.waitingFor}>
+            {everyoneHasReadied
+              ? "Waiting for lobby leader to start the game."
+              : "Waiting for all players to ready up."}
+          </div>
+        </div>
+      ) : (
+        <div>
+          {2 - props.lobby.players.length} or more players are required to start
+          this game
+        </div>
+      )}
+    </div>
+  );
+
+  const startElem = props.me.isLeader && everyoneHasReadied && (
+    <Button
+      btnStyle="primary"
+      className={styles.startButton}
+      onClick={() => onStartPress()}
+    >
+      Start Game!
+    </Button>
+  );
 
   const [totalRounds, setTotalRounds] = useState(0);
 
@@ -131,28 +174,17 @@ const WaitingScreen: React.FC<Props> = (props) => {
     </div>
   );
 
-  // PURELY FOR TESTING PURPOSES
-  const testingElem = (
-    <div>
-      {props.me.isLeader && (
-        <button onClick={() => onStartPress()}>force start button</button>
-      )}
-    </div>
-  );
   return (
     props.me.hasSetName && (
       <div className={styles.container}>
-        <div>
-          <h3>Players in {props.lobby.name} </h3>
-          {playerList}
-          {readyElem}
-          {startElem}
-        </div>
+        <h2>{props.lobby.name}</h2>
+        {playerList}
+        {readyElem}
+        {startElem}
         <div className={styles.settings}>
           {props.me.isLeader && (
             <div className={styles.lobbySettings}>
               <div className={styles.label}>Lobby Settings:</div>
-              {/* {testingElem} */}
               {publicSwitch}
               {roundsElem}
             </div>
