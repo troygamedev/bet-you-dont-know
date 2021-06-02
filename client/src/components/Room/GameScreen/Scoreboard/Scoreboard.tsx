@@ -1,5 +1,7 @@
 import InlineCoin from "@components/InlineCoin/InlineCoin";
 import { Lobby, User } from "@shared/types";
+import { useState } from "react";
+import KickButton from "../KickButton/KickButton";
 import styles from "./Scoreboard.module.scss";
 
 interface Props {
@@ -13,6 +15,8 @@ const Scoreboard: React.FC<Props> = (props) => {
   // sort the players by money
   rankings.sort((a, b) => b.money - a.money);
 
+  const [isHoveringOver, setIsHoveringOver] = useState(-1);
+
   return (
     <div className={styles.container}>
       <div className={styles.label}>Scoreboard</div>
@@ -24,6 +28,12 @@ const Scoreboard: React.FC<Props> = (props) => {
               className={`${styles.row} ${
                 idx % 2 == 0 ? styles.evenRow : styles.oddRow
               }`}
+              onMouseEnter={() => {
+                setIsHoveringOver(idx);
+              }}
+              onMouseLeave={() => {
+                setIsHoveringOver(-1);
+              }}
             >
               <div className={styles.wrapper}>
                 <div className={styles.name}>
@@ -35,6 +45,11 @@ const Scoreboard: React.FC<Props> = (props) => {
                     <InlineCoin width="15px" sideMargins="0 4px" />
                   </div>
                 </div>
+                {props.me.isLeader &&
+                  isHoveringOver === idx &&
+                  player.socketID !== props.me.socketID && (
+                    <KickButton whoToKick={player} />
+                  )}
               </div>
             </div>
           );

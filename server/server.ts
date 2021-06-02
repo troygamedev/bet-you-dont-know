@@ -502,10 +502,10 @@ io.on("connection", (socket: Socket) => {
           thisLobby.players.length;
 
         if (thisLobby.game.timeLeft <= 0 || everyoneWantsToSkip) {
-          // make sure this game is still ongoing (if the lobby is gone or if all players left, end the game)
+          // make sure this game is still ongoing (if the lobby is gone or if all but 1 player left, end the game)
           if (
             findLobbyWithID(lobbyID) != undefined &&
-            thisLobby.players.length > 0
+            thisLobby.players.length > 1
           ) {
             callbackWhenComplete();
           } else {
