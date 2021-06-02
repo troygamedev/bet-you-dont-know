@@ -1,6 +1,6 @@
 import { Lobby, User } from "@shared/types";
 import Scoreboard from "../Scoreboard/Scoreboard";
-import styles from "./Gameover.module.scss";
+import styles from "./GameOver.module.scss";
 
 interface Props {
   lobby: Lobby;
