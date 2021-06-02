@@ -14,6 +14,7 @@ export interface User {
   bet: number;
   guessIndex: number;
   wantsToSkip: boolean;
+  amKicked: boolean;
 }
 
 export interface ChatMessage {

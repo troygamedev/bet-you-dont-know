@@ -92,6 +92,14 @@ const Room: React.FC = () => {
     }, 3000);
   };
 
+  useEffect(() => {
+    if (me?.amKicked) {
+      socket.emit("leaveLobby");
+      router.push("/");
+      swal("You've been kicked from the lobby.");
+    }
+  }, [me?.amKicked]);
+
   if (lobby && me) {
     const namePickElem = me.hasSetName || (
       <div className={styles.namePickContainer}>

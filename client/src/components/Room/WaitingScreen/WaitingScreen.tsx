@@ -5,6 +5,7 @@ import Switch from "react-switch";
 import styles from "./WaitingScreen.module.scss";
 import { Button } from "react-bootstrap-buttons";
 import "react-bootstrap-buttons/dist/react-bootstrap-buttons.css";
+import PlayerList from "./PlayerList/PlayerList";
 
 interface Props {
   me: User;
@@ -22,36 +23,6 @@ const WaitingScreen: React.FC<Props> = (props) => {
   const onStartPress = () => {
     socket.emit("startGame", props.lobby.id);
   };
-
-  const playerList = props.lobby.users && (
-    <div className={styles.playerListContainer}>
-      <div className={styles.playerListLabel}>
-        Players: {props.lobby.players.length}
-      </div>
-      <div className={styles.scrollable}>
-        {props.lobby.users.map((user, idx) => {
-          return (
-            <div
-              className={`${styles.row} ${
-                idx % 2 == 0 ? styles.evenRow : styles.oddRow
-              }`}
-              key={idx}
-              style={{
-                color:
-                  (user.isReady && "#24e046") ||
-                  (user.isSpectator && "lightblue"),
-              }}
-            >
-              {(user.isLeader ? "[LEADER] " : "") +
-                user.displayName +
-                (user.socketID == socket.id ? " (You) " : " ") +
-                (user.isSpectator ? "[Spectator]" : "")}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
 
   const [isSpectator, setIsSpectator] = useState(false);
 
@@ -183,7 +154,7 @@ const WaitingScreen: React.FC<Props> = (props) => {
     props.me.hasSetName && (
       <div className={styles.container}>
         <h2>{props.lobby.name}</h2>
-        {playerList}
+        {props.lobby.users && <PlayerList lobby={props.lobby} me={props.me} />}
         {readyElem}
         {startElem}
         <div className={styles.settings}>

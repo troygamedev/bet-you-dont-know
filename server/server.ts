@@ -216,6 +216,7 @@ const joinLobby = (thisSocket: Socket, lobbyID: string) => {
     bet: 0,
     guessIndex: -1,
     wantsToSkip: false,
+    amKicked: false,
   };
 
   // add them to the user list
@@ -700,6 +701,17 @@ io.on("connection", (socket: Socket) => {
     const thisLobby = findLobbyWithID(thisUser.lobbyID);
     thisUser.wantsToSkip = true;
     emitLobbyEvent(socket, thisLobby.id, "updateLobby", thisLobby);
+  });
+
+  socket.on("kickPlayer", (userToKick: User) => {
+    try {
+      const thisUser = getUserReference(userToKick);
+      const thisLobby = findLobbyWithID(thisUser.lobbyID);
+      thisUser.amKicked = true;
+      emitLobbyEvent(socket, thisLobby.id, "updateLobby", thisLobby);
+    } catch (err) {
+      console.error(err);
+    }
   });
 
   socket.on("leaveLobby", () => {
