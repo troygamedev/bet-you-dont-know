@@ -1,3 +1,4 @@
-export const answeringDuration = 15;
+export const answeringDuration = 20;
 export const bettingDuration = 15;
-export const revealDuration = 8;
+export const revealDuration = 15;
+export const gameoverDuration = 30;

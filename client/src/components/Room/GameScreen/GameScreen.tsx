@@ -7,6 +7,7 @@ import TimeRemainingBar from "./TimeRemainingBar/TimeRemainingBar";
 import Reveal from "./Reveal/Reveal";
 import InlineCoin from "@components/InlineCoin/InlineCoin";
 import SkipButton from "./SkipButton/SkipButton";
+import GameOver from "./GameOver/GameOver";
 
 interface Props {
   lobby: Lobby;
@@ -37,9 +38,11 @@ const GameScreen: React.FC<Props> = (props) => {
   return (
     <div className={styles.container}>
       <div className={styles.upper}>
-        <div className={styles.scoreboard}>
-          <Scoreboard lobby={props.lobby} me={props.me} />
-        </div>
+        {props.lobby.game.gameStage !== "GameOver" && (
+          <div className={styles.scoreboard}>
+            <Scoreboard lobby={props.lobby} me={props.me} />
+          </div>
+        )}
         <div className={styles.notScoreboard}>
           {gameInfoElem}
           {moneyElem}
@@ -58,11 +61,16 @@ const GameScreen: React.FC<Props> = (props) => {
           {props.lobby.game.gameStage === "Reveal" && (
             <Reveal lobby={props.lobby} me={props.me} />
           )}
+          {props.lobby.game.gameStage === "GameOver" && (
+            <GameOver lobby={props.lobby} me={props.me} />
+          )}
         </div>
         <div className={styles.bottom}>
           {props.lobby.isInGame && (
             <>
-              <TimeRemainingBar lobby={props.lobby} />
+              <div className={styles.timeRemainingBar}>
+                <TimeRemainingBar lobby={props.lobby} />
+              </div>
               <div className={styles.skipButton}>
                 <SkipButton lobby={props.lobby} me={props.me} />
               </div>

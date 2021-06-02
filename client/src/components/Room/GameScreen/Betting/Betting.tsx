@@ -77,7 +77,7 @@ const Betting: React.FC<Props> = (props) => {
             <Button
               btnStyle="success"
               onClick={() => {
-                setBetValue(props.me.money / 2);
+                setBetValue(Math.max(0, props.me.money / 2));
               }}
             >
               Half
@@ -85,7 +85,7 @@ const Betting: React.FC<Props> = (props) => {
             <Button
               btnStyle="success"
               onClick={() => {
-                setBetValue(props.me.money);
+                setBetValue(Math.max(0, props.me.money));
               }}
             >
               All In

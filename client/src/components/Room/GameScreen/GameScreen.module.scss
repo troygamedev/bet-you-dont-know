@@ -1,20 +1,22 @@
 @import "@styles/variables";
 .container {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+
   .upper {
-    height: 30%;
-    position: relative;
+    flex-grow: 3;
+    display: flex;
 
     .scoreboard {
-      position: absolute;
-      left: 40px;
-      width: 25%;
-      margin: 20px auto;
+      flex-grow: 1;
+      margin: 20px;
     }
 
     .notScoreboard {
-      margin-left: 40%; // make room for scoreboard
+      flex-grow: 2;
       display: flex;
+      justify-content: space-evenly;
       .money {
         display: flex;
         font-size: larger;
@@ -33,23 +35,24 @@
   }
 
   .lower {
-    position: relative;
+    flex-grow: 7;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     height: 70%;
     .mid {
-      height: 80%;
+      flex-grow: 6;
       margin-top: 20px;
     }
     .bottom {
-      // anchored to the bottom
-      position: absolute;
-      bottom: 10px;
-      width: 100%;
-      height: 20%;
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 5px;
 
-      .skipButton {
-        position: absolute;
-        top: 0px;
-        right: 25px;
+      .timeRemainingBar {
+        margin-top: 10px;
+        width: 80%;
       }
     }
   }

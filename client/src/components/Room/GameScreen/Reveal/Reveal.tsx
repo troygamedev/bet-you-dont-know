@@ -42,36 +42,46 @@ const Reveal: React.FC<Props> = (props) => {
       </div>
       <div className={styles.explanation}>
         {wasCorrect
-          ? +` ${currentAnswerer.displayName} earns $1000 for answering correctly and also receives everyone's incorrect bets!`
+          ? `${currentAnswerer.displayName} earns $1000 for answering correctly and also receives everyone's incorrect bets!`
           : `The answer was ${currentQuestion.answer}. ${currentAnswerer.displayName} must pay everyone who betted against them for answering incorrectly!`}
       </div>
       <div className={styles.revealListContainer}>
-        <div className={styles.revealListLabel}>Earnings and Losses:</div>
-        <div className={styles.scrollable}>
-          {props.lobby.game.revealResults.map((result, idx) => {
-            return (
-              <div
-                className={`${styles.row} ${
-                  idx % 2 == 0 ? styles.evenRow : styles.oddRow
-                }`}
-                key={idx}
-              >
-                {result.who.displayName}:
-                <div className={styles.numberWrapper}>
+        {props.lobby.game.revealResults.length === 0 ? (
+          <div className={styles.revealListLabel}>
+            Nobody placed any bets, so no gains or losses were made.
+          </div>
+        ) : (
+          <>
+            <div className={styles.revealListLabel}>
+              Nobody placed any bets, so no gains or losses were made.
+            </div>
+            <div className={styles.scrollable}>
+              {props.lobby.game.revealResults.map((result, idx) => {
+                return (
                   <div
-                    className={styles.number}
-                    style={{
-                      color: result.netGain > 0 ? "lime" : "red",
-                    }}
+                    className={`${styles.row} ${
+                      idx % 2 == 0 ? styles.evenRow : styles.oddRow
+                    }`}
+                    key={idx}
                   >
-                    {(result.netGain > 0 && "+") + result.netGain}
-                    <InlineCoin width="15px" sideMargins="0 4px" />
+                    {result.who.displayName}:
+                    <div className={styles.numberWrapper}>
+                      <div
+                        className={styles.number}
+                        style={{
+                          color: result.netGain > 0 ? "lime" : "red",
+                        }}
+                      >
+                        {(result.netGain > 0 && "+") + result.netGain}
+                        <InlineCoin width="15px" sideMargins="0 4px" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

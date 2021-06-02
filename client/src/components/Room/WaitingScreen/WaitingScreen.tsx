@@ -108,15 +108,20 @@ const WaitingScreen: React.FC<Props> = (props) => {
           )}
 
           <div className={styles.waitingFor}>
-            {everyoneHasReadied
-              ? "Waiting for lobby leader to start the game..."
-              : "Waiting for all players to ready up..."}
+            {everyoneHasReadied ? (
+              <div style={{ color: "orangered" }}>
+                Waiting for lobby leader to start the game...
+              </div>
+            ) : (
+              <div style={{ color: "orange" }}>
+                Waiting for all players to ready up...
+              </div>
+            )}
           </div>
         </div>
       ) : (
         <div>
-          {2 - props.lobby.players.length} or more players are required to start
-          this game
+          Waiting for {2 - props.lobby.players.length} more players to join
         </div>
       )}
     </div>
@@ -137,14 +142,14 @@ const WaitingScreen: React.FC<Props> = (props) => {
   const trySetRounds = (num: number) => {
     try {
       // clamp the rounds between props.lobby.players.length and 10 x that number
-      num = Math.min(
+      let newNum = Math.min(
         Math.max(num, props.lobby.players.length),
         props.lobby.players.length * 10
       );
 
-      setTotalRounds(num);
+      setTotalRounds(newNum);
 
-      socket.emit("setTotalRounds", props.lobby.id, num);
+      socket.emit("setTotalRounds", props.lobby.id, newNum);
     } catch (err) {
       console.error(err);
     }
@@ -154,7 +159,7 @@ const WaitingScreen: React.FC<Props> = (props) => {
     if (props.lobby.players != undefined) {
       trySetRounds(props.lobby.players.length * 2);
     }
-  }, [props.lobby.players]);
+  }, [props.lobby.players.length]);
 
   const handleRoundsChange = (e: ChangeEvent<HTMLInputElement>) => {
     trySetRounds(parseInt(e.target.value));

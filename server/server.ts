@@ -14,6 +14,7 @@ import {
   answeringDuration,
   bettingDuration,
   revealDuration,
+  gameoverDuration,
 } from "../shared/globalVariables";
 
 import dayjs from "dayjs";
@@ -638,13 +639,13 @@ io.on("connection", (socket: Socket) => {
 
       countdown(() => {
         // check if game is over
-        thisLobby.game.roundsCompleted++;
         if (
           thisLobby.game.roundsCompleted >=
-          thisLobby.game.totalRoundsUntilGameover
+          thisLobby.game.totalRoundsUntilGameover - 1
         ) {
           startGameOverStage();
         } else {
+          thisLobby.game.roundsCompleted++;
           startAnsweringStage();
         }
       }, revealDuration);
@@ -653,15 +654,16 @@ io.on("connection", (socket: Socket) => {
     const startGameOverStage = () => {
       thisLobby.game.gameStage = "GameOver";
 
-      // do some resetting
-      thisLobby.isInGame = false;
-      // set everyone to unready
-      thisLobby.users.forEach((user) => {
-        user.isReady = false;
-      });
-
-      // tell everyone in the lobby to update their lobby object
-      emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
+      countdown(() => {
+        // do some resetting
+        thisLobby.isInGame = false;
+        // set everyone to unready
+        thisLobby.users.forEach((user) => {
+          user.isReady = false;
+        });
+        // tell everyone in the lobby to update their lobby object
+        emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
+      }, gameoverDuration);
     };
   });
 
@@ -690,6 +692,7 @@ io.on("connection", (socket: Socket) => {
     if (thisLobby != undefined) {
       thisLobby.game.totalRoundsUntilGameover = rounds;
     }
+    socket.emit("updateLobby", thisLobby);
   });
 
   socket.on("wantSkip", (who: User) => {
