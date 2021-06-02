@@ -10,6 +10,7 @@ import styles from "./Room.module.scss";
 import { useRouter } from "next/router";
 import { Button } from "react-bootstrap-buttons";
 import "react-bootstrap-buttons/dist/react-bootstrap-buttons.css";
+import HowToPlay from "./HowToPlay/HowToPlay";
 
 const Room: React.FC = () => {
   const socket = useContext(SocketContext);
@@ -121,41 +122,6 @@ const Room: React.FC = () => {
       <WaitingScreen lobby={lobby} me={me} />
     );
 
-    const rulesElem = (
-      <div>
-        <div>
-          When it is your turn:
-          <ul>
-            <li>
-              If you answer the trivia question correctly, you get $1000. You
-              also receive money from all the bets that were placed against you.
-            </li>
-            <li>
-              If you answer the trivia question incorrectly, you lose however
-              much money your friends betted against you.
-            </li>
-          </ul>
-        </div>
-        <div>
-          When it is someone else's turn:
-          <ul>
-            <li>
-              You can place bets that your friend would answer the trivia
-              question incorrectly.
-            </li>
-            <li>
-              If your prediction was correct, the amount of money you bet will
-              be taken from that player's balance and into yours.
-            </li>
-            <li>
-              If your prediction was incorrect, you lose the amount of money you
-              bet and will be given to the player.
-            </li>
-          </ul>
-        </div>
-      </div>
-    );
-
     const linkShareElem = (
       <div className={styles.linkShareContainer}>
         <label className={styles.label}>Invite your friends by sharing:</label>
@@ -198,8 +164,8 @@ const Room: React.FC = () => {
                 )}
               </div>
             </div>
+            <HowToPlay />
             {linkShareElem}
-            {rulesElem}
           </>
         )}
       </Layout>

@@ -1,5 +1,7 @@
+@import "@styles/mixins";
+
 .container {
-  width: 100%;
+  width: 90%;
   max-width: 400px;
   margin: auto;
   .wrapper {
@@ -7,15 +9,19 @@
     margin: 0 auto 10px;
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
     .logoImg {
       height: 80%;
+      margin-right: 20px;
     }
 
     .text {
       text-align: left;
       h1 {
         margin: 0;
+        @include mobile {
+          font-size: large;
+        }
       }
       h2 {
         margin: 0;

@@ -1,0 +1,47 @@
+@import "@styles/variables";
+
+.container {
+  margin: 40px auto;
+  width: fit-content;
+  max-width: 80vw;
+  padding: 30px 10px;
+
+  .rulesContainer {
+    text-align: left;
+    width: 90%;
+    max-width: 800px;
+    margin: auto;
+
+    .collapsible {
+      background-color: $primary;
+      cursor: pointer;
+      margin: 3px auto;
+      .trigger {
+        display: flex;
+        height: 50px;
+        justify-content: space-between;
+        align-items: center;
+        .triggerTitle {
+          padding: 10px 20px;
+        }
+
+        img {
+          padding: none;
+          margin: none;
+          margin-right: 2%;
+          height: 60%;
+        }
+      }
+      .content {
+        background-color: $secondary;
+        border: 1px solid $primary;
+        cursor: default;
+        padding: 10px 20px;
+      }
+    }
+  }
+
+  .howToPlayButton {
+    margin-top: 10px;
+  }
+}
