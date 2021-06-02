@@ -95,7 +95,7 @@ const Betting: React.FC<Props> = (props) => {
         <Button
           btnStyle="primary"
           onClick={() => submitBet()}
-          className={styles.betButton}
+          className={styles.confirmButton}
         >
           Confirm Bet
         </Button>

@@ -1,10 +1,13 @@
 @import "@styles/variables";
+@import "@styles/mixins";
+
 .namePickContainer {
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 300px;
   margin: auto;
+
   .namePickLabel {
     font-size: larger;
     margin-bottom: 20px;
@@ -24,17 +27,30 @@
 .container {
   display: flex;
   justify-content: center;
-  // border: 1px solid red;
   width: 90%;
   height: 80vh;
   margin: auto;
+  @include mobile {
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 1000px;
+  }
   .screen {
     width: 75%;
     border: 3px solid $primary;
+    @include mobile {
+      width: 100%;
+      height: 75%;
+    }
   }
   .chat {
     width: 25%;
     height: 100%;
+    @include mobile {
+      margin: 40px auto 0px;
+      width: 100%;
+      height: 25%;
+    }
   }
 }
 .linkShareContainer {

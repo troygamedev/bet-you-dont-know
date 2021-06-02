@@ -52,9 +52,7 @@ const Reveal: React.FC<Props> = (props) => {
           </div>
         ) : (
           <>
-            <div className={styles.revealListLabel}>
-              Nobody placed any bets, so no gains or losses were made.
-            </div>
+            <div className={styles.revealListLabel}>Gains and Losses:</div>
             <div className={styles.scrollable}>
               {props.lobby.game.revealResults.map((result, idx) => {
                 return (

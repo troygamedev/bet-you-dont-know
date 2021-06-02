@@ -1,4 +1,6 @@
 @import "@styles/variables";
+@import "@styles/mixins";
+
 .container {
   height: 100%;
   display: flex;
@@ -17,6 +19,9 @@
       flex-grow: 2;
       display: flex;
       justify-content: space-evenly;
+      @include mobile {
+        flex-direction: column;
+      }
       .money {
         display: flex;
         font-size: larger;
@@ -26,6 +31,10 @@
         border: 1px solid;
         padding: 10px 30px 10px 15px;
         border-radius: 10px;
+        @include mobile {
+          font-size: medium;
+          min-height: 40px;
+        }
       }
       .gameInfo {
         margin-top: 20px;
@@ -43,6 +52,11 @@
     .mid {
       flex-grow: 6;
       margin-top: 20px;
+
+      @include mobile {
+        width: 90%;
+        margin: auto;
+      }
     }
     .bottom {
       flex-grow: 1;

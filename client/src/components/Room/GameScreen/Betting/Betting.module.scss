@@ -1,10 +1,14 @@
 @import "@styles/variables";
+@import "@styles/mixins";
 
 .bettingContainer {
   display: flex;
   flex-direction: column;
   width: 50%;
   margin: auto;
+  @include mobile {
+    width: 80%;
+  }
   .betLabel {
     font-size: larger;
   }
@@ -23,9 +27,12 @@
       display: flex;
     }
   }
-  .betButton {
+  .confirmButton {
     width: 30%;
     margin: auto;
+    @include mobile {
+      min-width: 150px;
+    }
   }
   .currentBet {
     font-size: x-large;
@@ -36,5 +43,9 @@
     margin: 20px auto;
     height: 20px;
     color: $coin;
+
+    @include mobile {
+      font-size: large;
+    }
   }
 }

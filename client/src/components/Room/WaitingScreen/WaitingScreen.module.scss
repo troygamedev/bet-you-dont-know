@@ -1,4 +1,5 @@
 @import "@styles/variables";
+@import "@styles/mixins";
 
 .container {
   height: 100%;
@@ -48,8 +49,9 @@
     }
   }
   .startButton {
-    width: 20%;
-    margin: auto;
+    width: 40%;
+    max-width: 200px;
+    margin: 10px auto;
   }
 
   .settings {
@@ -58,6 +60,11 @@
     width: 60%;
     margin: auto;
     justify-content: space-evenly;
+
+    @include mobile {
+      flex-direction: column;
+      min-height: 250px;
+    }
 
     .lobbySettings,
     .userSettings {
