@@ -38,7 +38,7 @@ const Layout: React.FC<Props> = (props) => {
         />
         <meta
           property="og:image"
-          content="https://bet-you-dont-know/img/bet-you-dont-know-logo.png"
+          content="https://bet-you-dont-know.herokuapp.com/img/bet-you-dont-know-logo.png"
         />
         <meta
           property="og:description"
