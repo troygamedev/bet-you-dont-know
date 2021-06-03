@@ -158,7 +158,11 @@ const Room: React.FC<Props> = (props) => {
     );
 
     return (
-      <Layout title={lobby.name ? lobby.name : "Loading..."} alertLeave>
+      <Layout
+        title={lobby.name ? lobby.name : "Loading..."}
+        openGraphTitle={"Join Lobby | Bet You Don't Know"}
+        alertLeave
+      >
         {namePickElem}
         {me.hasSetName && (
           <>
