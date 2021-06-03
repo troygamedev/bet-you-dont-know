@@ -27,23 +27,40 @@ const Layout: React.FC<Props> = (props) => {
       <Head>
         <title>{props.title}</title>
         <meta
-          name="Description"
-          content="a simple multiplayer game of wits, deception, and bets!"
+          name="description"
+          content="a simple multiplayer game of wits, deception, and bets!
+        "
         />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Bet You Don't Know" />
-        <meta property="og:type" content="website" />
+
         <meta
           property="og:url"
-          content="https://bet-you-dont-know.herokuapp.com"
+          content="https://www.bet-you-dont-know.herokuapp.com/"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Bet You Don't Know" />
+        <meta
+          property="og:description"
+          content="a simple multiplayer game of wits, deception, and bets!"
         />
         <meta
           property="og:image"
           content="https://bet-you-dont-know.herokuapp.com/img/bet-you-dont-know-logo.png"
         />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="twitter:domain" content="" />
         <meta
-          property="og:description"
+          property="twitter:url"
+          content="https://www.bet-you-dont-know.herokuapp.com/"
+        />
+        <meta name="twitter:title" content="Bet You Don't Know" />
+        <meta
+          name="twitter:description"
           content="a simple multiplayer game of wits, deception, and bets!"
+        />
+        <meta
+          name="twitter:image"
+          content="https://bet-you-dont-know.herokuapp.com/img/bet-you-dont-know-logo.png"
         />
       </Head>
       <main className={styles.main}>
