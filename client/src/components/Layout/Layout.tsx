@@ -31,10 +31,7 @@ const Layout: React.FC<Props> = (props) => {
           content="a simple multiplayer game of wits, deception, and bets!"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta
-          property="og:title"
-          content={props.openGraphTitle || props.title}
-        />
+        <meta property="og:title" content="Bet You Don't Know" />
         <meta property="og:type" content="website" />
         <meta
           property="og:url"
