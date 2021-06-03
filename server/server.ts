@@ -321,6 +321,7 @@ io.on("connection", (socket: Socket) => {
     // find the user in the lobby user list
     if (user == undefined) return null;
     const thisLobby = findLobbyWithID(user.lobbyID);
+    if (thisLobby == undefined) return null;
     return thisLobby.users.find(
       (thisUser) => thisUser.socketID == user.socketID
     );
@@ -496,6 +497,15 @@ io.on("connection", (socket: Socket) => {
       emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
 
       const tick = () => {
+        // check if there are even players
+        if (
+          thisLobby.game.gameStage !== "GameOver" &&
+          thisLobby.players.length <= 1
+        ) {
+          startGameOverStage();
+          return;
+        }
+
         // if the countdown is finished or if everyone wants to skip
         const everyoneWantsToSkip =
           thisLobby.players.filter((p) => p.wantsToSkip).length ===
@@ -504,8 +514,10 @@ io.on("connection", (socket: Socket) => {
         if (thisLobby.game.timeLeft <= 0 || everyoneWantsToSkip) {
           // make sure this game is still ongoing (if the lobby is gone or if all but 1 player left, end the game)
           if (
-            findLobbyWithID(lobbyID) != undefined &&
-            thisLobby.players.length > 1
+            (findLobbyWithID(lobbyID) != undefined &&
+              thisLobby.players.length > 1) ||
+            (thisLobby.players.length == 1 &&
+              thisLobby.game.gameStage === "GameOver")
           ) {
             callbackWhenComplete();
           } else {
@@ -548,7 +560,11 @@ io.on("connection", (socket: Socket) => {
         ];
 
       const currentQuestion =
-        triviaQuestions[randomIndexesArray[thisLobby.game.roundsCompleted]];
+        triviaQuestions[
+          randomIndexesArray[
+            thisLobby.game.roundsCompleted % randomIndexesArray.length
+          ]
+        ];
       thisLobby.game.currentQuestion = currentQuestion;
 
       thisLobby.game.currentAnswerer.guessIndex = -1; // reset their guess
@@ -654,17 +670,20 @@ io.on("connection", (socket: Socket) => {
 
     const startGameOverStage = () => {
       thisLobby.game.gameStage = "GameOver";
-
       countdown(() => {
-        // do some resetting
-        thisLobby.isInGame = false;
-        // set everyone to unready
-        thisLobby.users.forEach((user) => {
-          user.isReady = false;
-        });
-        // tell everyone in the lobby to update their lobby object
-        emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
+        resetGame();
       }, gameoverDuration);
+    };
+
+    const resetGame = () => {
+      // do some resetting
+      thisLobby.isInGame = false;
+      // set everyone to unready
+      thisLobby.users.forEach((user) => {
+        user.isReady = false;
+      });
+      // tell everyone in the lobby to update their lobby object
+      emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
     };
   });
 
