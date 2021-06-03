@@ -165,6 +165,11 @@
   resolved "https://registry.yarnpkg.com/@ramonak/react-progress-bar/-/react-progress-bar-3.1.0.tgz#da5fefd0668b064a4bb9dead639eb0edf644e757"
   integrity sha512-jTijspNx6dLwHBZbPZ5n0ZcXn14UrE8TWq6U86iwhIDzU746FK4QtKVCucHAC0QIBah7UBffolY2Lux4U9KtRQ==
 
+"@types/base16@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@types/base16/-/base16-1.0.2.tgz#eb3a07db52309bfefb9ba010dfdb3c0784971f65"
+  integrity sha512-oYO/U4VD1DavwrKuCSQWdLG+5K22SLPem2OQaHmFcQuwHoVeGC+JGVRji2MUqZUAIQZHEonOeVfAX09hYiLsdg==
+
 "@types/component-emitter@^1.2.10":
   version "1.2.10"
   resolved "https://registry.yarnpkg.com/@types/component-emitter/-/component-emitter-1.2.10.tgz#ef5b1589b9f16544642e473db5ea5639107ef3ea"
@@ -175,12 +180,24 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.7.tgz#98a993516c859eb0d5c4c8f098317a9ea68db9ad"
   integrity sha512-cxWFQVseBm6O9Gbw1IWb8r6OS4OhSt3hPZLkFApLjM8TEXROBuQGLAH2i2gZpcXdLBIrpXuTDhH7Vbm1iXmNGA==
 
+"@types/lodash.curry@^4.1.6":
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/@types/lodash.curry/-/lodash.curry-4.1.6.tgz#f26c490c80c92d7cbaa2300d542e89781d44b1ff"
+  integrity sha512-x3ctCcmOYqRrihNNnQJW6fe/yZFCgnrIa6p80AiPQRO8Jis29bBdy1dEw1FwngoF/mCZa3Bx+33fUZvOEE635Q==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*":
+  version "4.14.170"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.170.tgz#0d67711d4bf7f4ca5147e9091b847479b87925d6"
+  integrity sha512-bpcvu/MKHHeYX+qeEN8GE7DIravODWdACVA1ctevD8CN24RhPZIKMn9ntfAsrvLfSX3cR5RrBKAbYm9bGs0A+Q==
+
 "@types/node@^14.14.22":
   version "14.14.37"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.37.tgz#a3dd8da4eb84a996c36e331df98d82abd76b516e"
   integrity sha512-XYmBiy+ohOR4Lh5jE379fV2IU+6Jn4g5qASinhitfyO71b/sCo6MKsMLF5tc7Zf2CE8hViVQyYSobJNke8OvUw==
 
-"@types/prop-types@*":
+"@types/prop-types@*", "@types/prop-types@^15.7.3":
   version "15.7.3"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.3.tgz#2ab0d5da2e5815f94b0b9d4b95d1e5f243ab2ca7"
   integrity sha512-KfRL3PuHmqQLOG+2tGpRO26Ctg+Cq1E01D2DMriKEATHgWLfeNDmq9e29Q9WIky0dQ3NPkd1mzYH8Lm936Z9qw==
@@ -576,6 +593,11 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
   integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
+
+base16@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/base16/-/base16-1.0.0.tgz#e297f60d7ec1014a7a971a39ebc8a98c0b681e70"
+  integrity sha1-4pf2DX7BAUp6lxo568ipjAtoHnA=
 
 base64-arraybuffer@0.1.4:
   version "0.1.4"
@@ -2333,6 +2355,11 @@ locate-path@^5.0.0:
   dependencies:
     p-locate "^4.1.0"
 
+lodash.curry@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/lodash.curry/-/lodash.curry-4.1.1.tgz#248e36072ede906501d75966200a86dab8b23170"
+  integrity sha1-JI42By7ekGUB11lmIAqG2riyMXA=
+
 lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
@@ -3232,6 +3259,18 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-base16-styling@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/react-base16-styling/-/react-base16-styling-0.8.0.tgz#6251b814b4e09efab3284ae1ecdd490f2c4111eb"
+  integrity sha512-ElvciPaL4xpWh7ISX7ugkNS/dvoh7DpVMp4t93ngnEsS2LkMd8Gu+cDDOLis2rj4889CNK662UdjOfv3wvZg9w==
+  dependencies:
+    "@types/base16" "^1.0.2"
+    "@types/lodash.curry" "^4.1.6"
+    base16 "^1.0.0"
+    color "^3.1.2"
+    csstype "^3.0.2"
+    lodash.curry "^4.1.1"
+
 react-bootstrap-buttons@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/react-bootstrap-buttons/-/react-bootstrap-buttons-1.0.0.tgz#6115aa9059b21d2f1a2faab8741a7a943330ff87"
@@ -3263,6 +3302,15 @@ react-is@16.13.1, react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+
+react-json-tree@^0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/react-json-tree/-/react-json-tree-0.15.0.tgz#16a5bbed761f711d1656de6c62818d40ddb09442"
+  integrity sha512-/bEFXZBfLFiep6ReuzatR8mz9G7sRmejElRDgcAuqY0Jsx7llouax2DM03rlQifrUJgmvTGmPA+olyWYyGagqA==
+  dependencies:
+    "@types/prop-types" "^15.7.3"
+    prop-types "^15.7.2"
+    react-base16-styling "^0.8.0"
 
 react-refresh@0.8.3:
   version "0.8.3"

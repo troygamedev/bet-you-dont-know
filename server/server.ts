@@ -3,6 +3,9 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
+import session from "express-session";
+require("dotenv").config();
+
 import {
   ChatMessage,
   Lobby,
@@ -10,6 +13,7 @@ import {
   TriviaQuestion,
   RevealResult,
 } from "@shared/types";
+
 import {
   answeringDuration,
   bettingDuration,
@@ -19,6 +23,13 @@ import {
 
 import dayjs from "dayjs";
 import fetch from "node-fetch";
+
+declare module "express-session" {
+  interface SessionData {
+    isAdmin: boolean;
+  }
+}
+
 try {
   const PORT = process.env.PORT || 5000;
 
@@ -53,6 +64,15 @@ try {
     express.static(path.join(__dirname, "../client/out"), {
       // index: false,
       extensions: ["html"],
+    })
+  );
+
+  // for admin purposes
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
     })
   );
 
@@ -96,10 +116,6 @@ try {
 
   let lobbies: Array<Lobby> = [];
 
-  const findLobbyWithID = (searchID: string) => {
-    return lobbies.find((lobby) => lobby.id == searchID);
-  };
-
   const myCustomDictionary = [
     "thunder",
     "phoenix",
@@ -141,6 +157,67 @@ try {
     "yankee",
     "zulu",
   ];
+  const leaveLobby = (thisSocket: Socket) => {
+    // search through lobbies for this user
+    lobbies.forEach((lobby, lobbyIdx) => {
+      lobby.users.forEach((user, userIdx) => {
+        if (user.socketID == thisSocket.id) {
+          // remove the user from lobby if the socket id matches
+          lobby.users.splice(userIdx, 1);
+
+          // remove the player from the player list (if they are in there)
+          const playerIndex = lobby.players.findIndex(
+            (player) => player.socketID === user.socketID
+          );
+          if (playerIndex !== -1) {
+            lobby.players.splice(playerIndex, 1);
+          }
+
+          // give the next user the lobby leader permission
+          if (lobby.users.length > 0) {
+            lobby.users[0].isLeader = true;
+          }
+
+          // send a server message that someone has left
+          sendMessage(
+            lobby.id,
+            {
+              message: user.displayName + " has left the lobby!",
+              timestamp: dayjs(),
+              isServer: true,
+            },
+            thisSocket
+          );
+
+          // tell everyone in the room to get the newest changes (except the guy leaving)
+          emitLobbyEvent(thisSocket, lobby.id, "updateLobby", lobby);
+
+          // leave the room
+          thisSocket.leave(lobby.id);
+
+          // if this lobby no longer has people, recycle it (delete it)
+          if (lobby != null && lobby.users.length == 0) {
+            lobbies.splice(lobbyIdx, 1);
+          }
+          // tell everyone  to update the lobby list
+          io.emit("updatePublicLobbyList", getPublicLobbies());
+
+          updateNumInGame();
+        }
+      });
+    });
+  };
+  const findLobbyWithID = (searchID: string, thisSocket: Socket) => {
+    const targetLobby = lobbies.find((lobby) => lobby.id == searchID);
+    if (targetLobby === undefined) {
+      thisSocket.emit(
+        "joinLobbyError",
+        "It looks like this lobby doesn't exist anymore"
+      );
+      thisSocket.emit("updateLobby", undefined);
+    }
+    return targetLobby;
+  };
 
   const createLobby = () => {
     let users: Array<User> = [];
@@ -198,8 +275,8 @@ try {
     if (lobbyID == null) return; // make sure the lobbyID isnt null
 
     // make sure the lobbyID actually exists in the lobbies list
-    const thisLobby = findLobbyWithID(lobbyID);
-    if (thisLobby == null) {
+    const thisLobby = findLobbyWithID(lobbyID, thisSocket);
+    if (thisLobby === undefined) {
       thisSocket.emit(
         "joinLobbyError",
         "It looks like this lobby doesn't exist anymore"
@@ -237,11 +314,15 @@ try {
     // subscribe them to the corresponding lobby room
     thisSocket.join(thisLobby.id);
 
-    sendMessage(thisLobby.id, {
-      message: "Someone has connected... picking their username right now...",
-      timestamp: dayjs(),
-      isServer: true,
-    });
+    sendMessage(
+      thisLobby.id,
+      {
+        message: "Someone has connected... picking their username right now...",
+        timestamp: dayjs(),
+        isServer: true,
+      },
+      thisSocket
+    );
 
     // update everyone's lobby object with the newest changes
     emitLobbyEvent(thisSocket, lobbyID, "updateLobby", thisLobby);
@@ -257,8 +338,15 @@ try {
   const Filter = require("bad-words"),
     filter = new Filter();
 
-  const sendMessage = (lobbyID: string, msg: ChatMessage) => {
-    const thisLobby = findLobbyWithID(lobbyID);
+  const sendMessage = (
+    lobbyID: string,
+    msg: ChatMessage,
+    thisSocket: Socket
+  ) => {
+    const thisLobby = findLobbyWithID(lobbyID, thisSocket);
+    if (thisLobby === undefined) {
+      return;
+    }
 
     // profanity filter
     msg.message = filter.clean(msg.message);
@@ -311,14 +399,21 @@ try {
     socket.on(
       "sendMessage",
       (lobbyID: string, message: string, sender: User) => {
-        sendMessage(lobbyID, {
-          message: message,
-          timestamp: dayjs(),
-          isServer: false,
-          user: sender,
-        });
+        sendMessage(
+          lobbyID,
+          {
+            message: message,
+            timestamp: dayjs(),
+            isServer: false,
+            user: sender,
+          },
+          socket
+        );
 
-        const thisLobby = findLobbyWithID(lobbyID);
+        const thisLobby = findLobbyWithID(lobbyID, socket);
+        if (thisLobby === undefined) {
+          return;
+        }
 
         // send this to everyone in the room
         emitLobbyEvent(socket, lobbyID, "updateLobby", thisLobby);
@@ -331,9 +426,9 @@ try {
 
     const getUserReference = (user: User) => {
       // find the user in the lobby user list
-      if (user == undefined) return null;
-      const thisLobby = findLobbyWithID(user.lobbyID);
-      if (thisLobby == undefined) return null;
+      if (user == undefined) return undefined;
+      const thisLobby = findLobbyWithID(user.lobbyID, socket);
+      if (thisLobby == undefined) return undefined;
       return thisLobby.users.find(
         (thisUser) => thisUser.socketID == user.socketID
       );
@@ -342,6 +437,7 @@ try {
     socket.on("setUsername", (user: User, newUsername: string) => {
       // find the user in the lobby user list
       const theUser = getUserReference(user);
+      if (theUser === undefined) return;
 
       // set the new name and mark as set
       theUser.username = newUsername;
@@ -354,7 +450,9 @@ try {
       // ex: Bob0, Bob1, Bob2 <-- find Bob2
       let biggestConflictingIndex = 0;
       let thisNameIsADuplicate = false;
-      const thisLobby = findLobbyWithID(user.lobbyID);
+      const thisLobby = findLobbyWithID(user.lobbyID, socket);
+      if (thisLobby === undefined) return;
+
       thisLobby.users.forEach((thisUser) => {
         if (
           thisUser.username == theUser.username &&
@@ -379,68 +477,27 @@ try {
       }
 
       // announce that the user has joined the lobby if this is their first set
-      sendMessage(theUser.lobbyID, {
-        message: theUser.displayName + " has joined the lobby!",
-        timestamp: dayjs(),
-        isServer: true,
-      });
+      sendMessage(
+        theUser.lobbyID,
+        {
+          message: theUser.displayName + " has joined the lobby!",
+          timestamp: dayjs(),
+          isServer: true,
+        },
+        socket
+      );
 
       // tell everyone in the lobby to update their lobby object
       emitLobbyEvent(socket, theUser.lobbyID, "updateLobby", thisLobby);
     });
 
-    const leaveLobby = (thisSocket: Socket) => {
-      // search through lobbies for this user
-      lobbies.forEach((lobby, lobbyIdx) => {
-        lobby.users.forEach((user, userIdx) => {
-          if (user.socketID == thisSocket.id) {
-            // remove the user from lobby if the socket id matches
-            lobby.users.splice(userIdx, 1);
-
-            // remove the player from the player list (if they are in there)
-            const playerIndex = lobby.players.findIndex(
-              (player) => player.socketID === user.socketID
-            );
-            if (playerIndex !== -1) {
-              lobby.players.splice(playerIndex, 1);
-            }
-
-            // give the next user the lobby leader permission
-            if (lobby.users.length > 0) {
-              lobby.users[0].isLeader = true;
-            }
-
-            // send a server message that someone has left
-            sendMessage(lobby.id, {
-              message: user.displayName + " has left the lobby!",
-              timestamp: dayjs(),
-              isServer: true,
-            });
-
-            // tell everyone in the room to get the newest changes (except the guy leaving)
-            emitLobbyEvent(thisSocket, lobby.id, "updateLobby", lobby);
-
-            // leave the room
-            thisSocket.leave(lobby.id);
-
-            // if this lobby no longer has people, recycle it (delete it)
-            if (lobby != null && lobby.users.length == 0) {
-              lobbies.splice(lobbyIdx, 1);
-            }
-            // tell everyone  to update the lobby list
-            io.emit("updatePublicLobbyList", getPublicLobbies());
-
-            updateNumInGame();
-          }
-        });
-      });
-    };
-
     socket.on("setReady", (user: User, isReady: boolean) => {
       const theUser = getUserReference(user);
+      if (theUser === undefined) return;
       theUser.isReady = isReady;
 
-      const thisLobby = findLobbyWithID(user.lobbyID);
+      const thisLobby = findLobbyWithID(user.lobbyID, socket);
+      if (thisLobby === undefined) return;
 
       // tell everyone in the lobby to update their lobby object
       emitLobbyEvent(socket, theUser.lobbyID, "updateLobby", thisLobby);
@@ -448,9 +505,11 @@ try {
 
     socket.on("setIsSpectator", (user: User, isSpectator: boolean) => {
       const thisUser = getUserReference(user);
+      if (thisUser === undefined) return;
       thisUser.isSpectator = isSpectator;
 
-      const thisLobby = findLobbyWithID(user.lobbyID);
+      const thisLobby = findLobbyWithID(user.lobbyID, socket);
+      if (thisLobby === undefined) return;
 
       // helper function
       const findIndexOfUserInPlayersList = () => {
@@ -477,7 +536,9 @@ try {
       emitLobbyEvent(socket, user.lobbyID, "updateLobby", thisLobby);
     });
     socket.on("setLobbyPublic", (lobbyID: string, isPublic: boolean) => {
-      const thisLobby = findLobbyWithID(lobbyID);
+      const thisLobby = findLobbyWithID(lobbyID, socket);
+      if (thisLobby === undefined) return;
+
       thisLobby.isPublic = isPublic;
 
       // tell everyone in the lobby to update their lobby object
@@ -488,7 +549,8 @@ try {
     });
 
     socket.on("startGame", (lobbyID: string) => {
-      const thisLobby = findLobbyWithID(lobbyID);
+      const thisLobby = findLobbyWithID(lobbyID, socket);
+      if (thisLobby === undefined) return;
       thisLobby.isInGame = true;
       thisLobby.game.roundsCompleted = 0;
 
@@ -531,7 +593,7 @@ try {
           if (thisLobby.game.timeLeft <= 0 || everyoneWantsToSkip) {
             // make sure this game is still ongoing (if the lobby is gone or if all but 1 player left, end the game)
             if (
-              (findLobbyWithID(lobbyID) != undefined &&
+              (findLobbyWithID(lobbyID, socket) != undefined &&
                 thisLobby.players.length > 1) ||
               (thisLobby.players.length == 1 &&
                 thisLobby.game.gameStage === "GameOver")
@@ -705,7 +767,8 @@ try {
 
     socket.on("guessAnswer", (guesser: User, index: number) => {
       const thisUser = getUserReference(guesser);
-      const thisLobby = findLobbyWithID(thisUser.lobbyID);
+      if (thisUser === undefined) return;
+      const thisLobby = findLobbyWithID(thisUser.lobbyID, socket);
 
       thisUser.guessIndex = index;
 
@@ -715,7 +778,8 @@ try {
 
     socket.on("placeBet", (bettor: User, amount: number) => {
       const thisUser = getUserReference(bettor);
-      const thisLobby = findLobbyWithID(thisUser.lobbyID);
+      if (thisUser === undefined) return;
+      const thisLobby = findLobbyWithID(thisUser.lobbyID, socket);
 
       thisUser.bet = amount;
 
@@ -724,7 +788,7 @@ try {
     });
 
     socket.on("setTotalRounds", (lobbyID: string, rounds: number) => {
-      const thisLobby = findLobbyWithID(lobbyID);
+      const thisLobby = findLobbyWithID(lobbyID, socket);
       if (thisLobby != undefined) {
         thisLobby.game.totalRoundsUntilGameover = rounds;
       }
@@ -733,7 +797,8 @@ try {
 
     socket.on("wantSkip", (who: User) => {
       const thisUser = getUserReference(who);
-      const thisLobby = findLobbyWithID(thisUser.lobbyID);
+      if (thisUser === undefined) return;
+      const thisLobby = findLobbyWithID(thisUser.lobbyID, socket);
       thisUser.wantsToSkip = true;
       emitLobbyEvent(socket, thisLobby.id, "updateLobby", thisLobby);
     });
@@ -741,7 +806,8 @@ try {
     socket.on("kickPlayer", (userToKick: User) => {
       try {
         const thisUser = getUserReference(userToKick);
-        const thisLobby = findLobbyWithID(thisUser.lobbyID);
+        if (thisUser === undefined) return;
+        const thisLobby = findLobbyWithID(thisUser.lobbyID, socket);
         thisUser.amKicked = true;
         emitLobbyEvent(socket, thisLobby.id, "updateLobby", thisLobby);
       } catch (err) {
@@ -767,6 +833,48 @@ try {
   app.get("/lobby/:lobbyID", (req, res) => {
     const filePath = "[slug].html";
     res.sendFile(filePath, { root: "../client/out/lobby/" });
+  });
+
+  app.post("/api/admin/login", (req, res) => {
+    try {
+      const { password } = req.body;
+      if (password == process.env.ADMIN_PASSWORD) {
+        req.session.isAdmin = true;
+        res.status(200);
+      } else {
+        res.status(403);
+      }
+      res.send("received");
+    } catch (err) {
+      console.error(err);
+    }
+  });
+  app.post("/api/admin/lobbies", (req, res) => {
+    try {
+      if (req.session.isAdmin) {
+        res.send({ lobbies: lobbies });
+      } else {
+        res.status(403);
+        res.send([]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+  app.post("/api/admin/shutdown", (req, res) => {
+    try {
+      if (req.session.isAdmin) {
+        const { id } = req.body;
+        // find and delete the lobby
+        const index = lobbies.findIndex((lobby) => lobby.id === id);
+        lobbies.splice(index, 1);
+      } else {
+        res.status(403);
+      }
+      res.send("received");
+    } catch (err) {
+      console.error(err);
+    }
   });
 
   server.listen(PORT, () => {

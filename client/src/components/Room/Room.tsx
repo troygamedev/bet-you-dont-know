@@ -23,7 +23,18 @@ const Room: React.FC<Props> = (props) => {
   const [me, setMe] = useState<User>();
   useEffect(() => {
     socket.on("updateLobby", (newLobby: Lobby) => {
-      setLobby(newLobby);
+      if (newLobby === undefined) {
+        swal({
+          title: "Error",
+          text: "Lobby has been closed",
+          icon: "error",
+        }).then(() => {
+          // redirect to homepage
+          router.push("/");
+        });
+      } else {
+        setLobby(newLobby);
+      }
     });
     socket.on("joinLobbyError", (message: string) => {
       swal({
