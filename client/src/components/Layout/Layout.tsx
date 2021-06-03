@@ -7,6 +7,7 @@ import styles from "./Layout.module.scss";
 
 interface Props {
   title: string;
+  url: string;
   alertLeave?: boolean;
 }
 
@@ -25,6 +26,22 @@ const Layout: React.FC<Props> = (props) => {
     <>
       <Head>
         <title>{props.title}</title>
+        <meta
+          name="Description"
+          content="a simple multiplayer game of wits, deception, and bets!"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content={props.title} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={props.url} />
+        <meta
+          property="og:image"
+          content="https://bet-you-dont-know/img/bet-you-dont-know-logo.png"
+        />
+        <meta
+          property="og:description"
+          content="a simple multiplayer game of wits, deception, and bets!"
+        />
       </Head>
       <main className={styles.main}>
         <Header headerText="Bet You Don't Know" alertLeave={props.alertLeave} />

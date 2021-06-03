@@ -156,7 +156,11 @@ const Room: React.FC = () => {
     );
 
     return (
-      <Layout title={lobby.name ? lobby.name : "Loading..."} alertLeave>
+      <Layout
+        title={lobby.name ? lobby.name : "Loading..."}
+        url={window.location.href}
+        alertLeave
+      >
         {namePickElem}
         {me.hasSetName && (
           <>

@@ -2,7 +2,7 @@ import Layout from "@components/Layout/Layout";
 
 const FourOhFour: React.FC = () => {
   return (
-    <Layout title={"Page Not Found"}>
+    <Layout title={"Page Not Found"} url={window.location.href}>
       <h2>404 - Page Not Found :(</h2>
       <a href="../">Click me to go to home page</a>
     </Layout>
