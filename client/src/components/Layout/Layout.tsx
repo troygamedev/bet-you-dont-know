@@ -25,7 +25,8 @@ const Layout: React.FC<Props> = (props) => {
   return (
     <>
       <Head>
-        <title>{props.title}</title>
+        <title>Bet You Don't Know</title>
+        <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
           content="a simple multiplayer game of wits, deception, and bets!
