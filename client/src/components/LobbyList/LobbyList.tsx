@@ -10,6 +10,7 @@ const LobbyList: React.FC = () => {
   const socket = useContext(SocketContext);
 
   const [lobbyList, setLobbyList] = useState<Array<Lobby>>();
+  const [numInGame, setNumInGame] = useState(0);
 
   useEffect(() => {
     socket.on("updatePublicLobbyList", (lobbies: Array<Lobby>) => {
@@ -18,6 +19,10 @@ const LobbyList: React.FC = () => {
 
     socket.on("lobbyCreated", (newLobbyID: string) => {
       router.push("/lobby/" + newLobbyID);
+    });
+
+    socket.on("numInGameChanged", (newNum: number) => {
+      setNumInGame(newNum);
     });
 
     socket.emit("refetchPublicLobbyList");
@@ -37,6 +42,7 @@ const LobbyList: React.FC = () => {
     <>
       {lobbyList && (
         <div className={styles.container}>
+          <div>Players In-Game: {numInGame}</div>
           <div className={styles.lobbyCountLabel}>
             Public Lobbies: {lobbyList.length}
           </div>

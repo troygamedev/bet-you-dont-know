@@ -186,6 +186,13 @@ try {
     });
     return ans;
   };
+  const updateNumInGame = () => {
+    let num = 0;
+    lobbies.forEach((lobby) => {
+      num += lobby.users.length;
+    });
+    io.emit("numInGameChanged", num);
+  };
 
   const joinLobby = (thisSocket: Socket, lobbyID: string) => {
     if (lobbyID == null) return; // make sure the lobbyID isnt null
@@ -241,6 +248,8 @@ try {
 
     // refresh everyone's lobbies list
     io.emit("updatePublicLobbyList", getPublicLobbies());
+
+    updateNumInGame();
   };
 
   const MAX_CHAT_MESSAGES = 30;
@@ -287,6 +296,7 @@ try {
     // io.emit("message", "hello")
 
     socket.emit("updatePublicLobbyList", getPublicLobbies());
+    updateNumInGame();
 
     socket.on("createLobby", () => {
       const newLobbyID = createLobby();
@@ -419,6 +429,8 @@ try {
             }
             // tell everyone  to update the lobby list
             io.emit("updatePublicLobbyList", getPublicLobbies());
+
+            updateNumInGame();
           }
         });
       });
