@@ -31,11 +31,6 @@ const Layout: React.FC<Props> = (props) => {
           content="a simple multiplayer game of wits, deception, and bets!
         "
         />
-
-        <meta
-          property="og:url"
-          content="https://www.bet-you-dont-know.herokuapp.com/"
-        />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Bet You Don't Know" />
         <meta
@@ -47,12 +42,6 @@ const Layout: React.FC<Props> = (props) => {
           content="https://bet-you-dont-know.herokuapp.com/img/bet-you-dont-know-logo.png"
         />
 
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta property="twitter:domain" content="" />
-        <meta
-          property="twitter:url"
-          content="https://www.bet-you-dont-know.herokuapp.com/"
-        />
         <meta name="twitter:title" content="Bet You Don't Know" />
         <meta
           name="twitter:description"
