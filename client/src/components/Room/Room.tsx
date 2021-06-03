@@ -11,8 +11,10 @@ import { useRouter } from "next/router";
 import { Button } from "react-bootstrap-buttons";
 import "react-bootstrap-buttons/dist/react-bootstrap-buttons.css";
 import HowToPlay from "./HowToPlay/HowToPlay";
-
-const Room: React.FC = () => {
+interface Props {
+  slug: string;
+}
+const Room: React.FC<Props> = (props) => {
   const socket = useContext(SocketContext);
   const router = useRouter();
 
@@ -156,11 +158,7 @@ const Room: React.FC = () => {
     );
 
     return (
-      <Layout
-        title={lobby.name ? lobby.name : "Loading..."}
-        url={window.location.href}
-        alertLeave
-      >
+      <Layout title={lobby.name ? lobby.name : "Loading..."} alertLeave>
         {namePickElem}
         {me.hasSetName && (
           <>
