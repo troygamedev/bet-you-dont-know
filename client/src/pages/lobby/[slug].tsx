@@ -12,7 +12,7 @@ const Lobby: React.FC = () => {
     socket.emit("joinLobby", slug);
   }, [slug]);
 
-  return <Room />;
+  return <Room slug={slug as string} />;
 };
 
 export default Lobby;
