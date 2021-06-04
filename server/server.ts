@@ -38,10 +38,6 @@ try {
 
   const io = new Server(server, {
     cors: {
-      origin:
-        process.env.NODE_ENV === "production"
-          ? "https://chess-clock-trivia.herokuapp.com"
-          : "http://localhost:3000",
       credentials: true,
     },
   });
