@@ -1,7 +1,8 @@
 import styles from "./Header.module.scss";
-import HoverLink from "@components/HoverLink/HoverLink";
 import swal from "sweetalert";
 import { useRouter } from "next/router";
+import Link from "next/link";
+import { useEffect } from "react";
 
 interface Props {
   headerText: string;
@@ -36,18 +37,20 @@ const Header: React.FC<Props> = (props) => {
       });
     }
   };
+
   return (
-    <div onClick={(e) => handleClick(e)}>
+    <div
+      onClick={(e) => handleClick(e)}
+      style={{ cursor: props.alertLeave && "pointer" }}
+    >
       <div className={styles.container}>
-        <HoverLink href={"/"} active={!props.alertLeave}>
-          <div className={styles.wrapper}>
-            <img src="/img/logo.svg" alt="logo" className={styles.logoImg} />
-            <div className={styles.text}>
-              <h1>{props.headerText}</h1>
-              {/* <h2>a simple multiplayer game of wits, deception, and bets!</h2> */}
-            </div>
+        <div className={styles.wrapper}>
+          <img src="/img/logo.svg" alt="logo" className={styles.logoImg} />
+          <div className={styles.text}>
+            <h1>{props.headerText}</h1>
+            {/* <h2>a simple multiplayer game of wits, deception, and bets!</h2> */}
           </div>
-        </HoverLink>
+        </div>
       </div>
     </div>
   );
