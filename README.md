@@ -114,7 +114,8 @@ Here is a guide if you want to clone my website and modify it for yourself, all 
    ```
 3. Create a `.env` file in the /server folder and fill in the following info for the backend to function properly
    ```
-   ADMIN_EMAIL =
+   SESSION_SECRET=
+   ADMIN_PASSWORD=
    ```
 4. Enter in these environment variables in Heroku via Heroku's CLI or through the website dashboard.
 5. Publish the site on Heroku using continuous git integration. :tada:
