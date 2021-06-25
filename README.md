@@ -60,7 +60,7 @@ Frontend:
 Backend:
 * [Express.js](https://expressjs.com/)
 * [Node.js](https://nodejs.org/en/)
-* [Socket.io](https://www.postgresql.org/)
+* [Socket.io](https://socket.io/)
 * [Trivia Questions are fetched from this repo](https://github.com/troygamedev/trivia-game-data)
 
 Host:
