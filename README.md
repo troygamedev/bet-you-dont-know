@@ -21,9 +21,9 @@
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
-        <li><a href="#rules">Rules</a></li>
-        <li><a href="#rules">Example</a></li>
         <li><a href="#built-with">Built With</a></li>
+        <li><a href="#rules">Rules</a></li>
+        <li><a href="#example">Example</a></li>
       </ul>
     </li>
     <li>
@@ -49,6 +49,23 @@
 <img src="preview.png"></img>
 
 Players can create lobbies (private or public) and invite their friends to play via URL. The game involves 2 main stages: answering and betting. During the answering phase, a single player answers a trivia question. During the betting phase, all the other players will place bets hoping that the answerer got the trivia question wrong: the higher the bet, the more money they can steal from the answerer. Look below for rules and example.
+
+### Built With
+
+Frontend:
+* [Next.js](https://nextjs.org/)
+* [React](https://reactjs.org/)
+* [SCSS](https://sass-lang.com/)
+
+Backend:
+* [Express.js](https://expressjs.com/)
+* [Node.js](https://nodejs.org/en/)
+* [Socket.io](https://www.postgresql.org/)
+* [Trivia Questions are fetched from this repo](https://github.com/troygamedev/trivia-game-data)
+
+Host:
+* [Heroku](https://www.heroku.com/)
+
 
 ### Rules
 <details>
@@ -77,23 +94,6 @@ Players can create lobbies (private or public) and invite their friends to play 
     </ol>
   </div>
 </details>
-
-### Built With
-
-Frontend:
-* [Next.js](https://nextjs.org/)
-* [React](https://reactjs.org/)
-* [SCSS](https://sass-lang.com/)
-
-Backend:
-* [Express.js](https://expressjs.com/)
-* [Node.js](https://nodejs.org/en/)
-* [Socket.io](https://www.postgresql.org/)
-* [Trivia Questions are fetched from this repo](https://github.com/troygamedev/trivia-game-data)
-
-Host:
-* [Heroku](https://www.heroku.com/)
-
 
 <!-- GETTING STARTED -->
 ## Getting Started
