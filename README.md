@@ -32,6 +32,7 @@
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#development">Development</a></li>
+        <li><a href="#deployment">Deployment</a></li>
       </ul>
     </li>
     <li><a href="#license">License</a></li>
@@ -50,26 +51,32 @@
 Players can create lobbies (private or public) and invite their friends to play via URL. The game involves 2 main stages: answering and betting. During the answering phase, a single player answers a trivia question. During the betting phase, all the other players will place bets hoping that the answerer got the trivia question wrong: the higher the bet, the more money they can steal from the answerer. Look below for rules and example.
 
 ### Rules
-<div>
-  <p>Players take turns answering trivia questions.</p>
-  <p>On your turn:</p>
-  <ol>
-    <li>Answer the trivia question displayed. (multiple choice)</li>
-    <li>All other players can place bets hoping that you answered incorrectly.</li>
-    <li>If their prediction was right (you got the question wrong), you will have to pay however much they betted on you.</li>
-    <li>However, if you proved them wrong and answered correctly, you will earn $1000 AND everyone who didn't believe in you will have to pay their bets to you!</li>
-  </ol>
-</div>
+<details>
+  <summary>Rules</summary>
+  <div>
+    <p>Players take turns answering trivia questions.</p>
+    <p>On your turn:</p>
+    <ol>
+      <li>Answer the trivia question displayed. (multiple choice)</li>
+      <li>All other players can place bets hoping that you answered incorrectly.</li>
+      <li>If their prediction was right (you got the question wrong), you will have to pay however much they betted on you.</li>
+      <li>However, if you proved them wrong and answered correctly, you will earn $1000 AND everyone who didn't believe in you will have to pay their bets to you!</li>
+    </ol>
+  </div>
+</details>
 
 ### Example
-<div>
-  <ol>
-    <p>It's Bob's turn to answer:</p>
-    <li>Bob answers the question: What is 1+1? Bob bluffs that he can't do math.</li>
-    <li>John believes that Bob is indeed bad at math and bets $500 that Bob will answer incorrectly.</li>
-    <li>No way! Bob guessed correctly and won $1000. Additionally, because John made an incorrect prediction, $500 is deducted from his balance and given to Bob!</li>
-  </ol>
-</div>
+<details>
+  <summary>Example</summary>
+  <div>
+    <ol>
+      <p>It's Bob's turn to answer:</p>
+      <li>Bob answers the question: What is 1+1? Bob bluffs that he can't do math.</li>
+      <li>John believes that Bob is indeed bad at math and bets $500 that Bob will answer incorrectly.</li>
+      <li>No way! Bob guessed correctly and won $1000. Additionally, because John made an incorrect prediction, $500 is deducted from his balance and given to Bob!</li>
+    </ol>
+  </div>
+</details>
 
 ### Built With
 
@@ -117,8 +124,7 @@ Here is a guide if you want to clone my website and modify it for yourself, all 
    SESSION_SECRET=
    ADMIN_PASSWORD=
    ```
-4. Enter in these environment variables in Heroku via Heroku's CLI or through the website dashboard.
-5. Publish the site on Heroku using continuous git integration. :tada:
+
 
 ### Development
 
@@ -127,6 +133,10 @@ To run the development server
    yarn dev
    ```
 Then head over to localhost:3000
+
+### Deployment
+1. Publish the site on Heroku using continuous git integration.
+2. Enter in the environment variables (from `.env`) to Heroku via Heroku's CLI or through the website dashboard.
 
 <!-- LICENSE -->
 ## License
@@ -147,3 +157,7 @@ Project Link: [https://github.com/troygamedev/bet-you-dont-know](https://github.
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 * [bad-words for chat profanity filter](https://www.npmjs.com/package/bad-words)
+* [day.js](https://day.js.org/)
+* [sweetalert](sweetalert.js.org/)
+* [react-switch](https://www.npmjs.com/package/react-switch)
+* [react-collapsible](https://www.npmjs.com/package/react-collapsible)
