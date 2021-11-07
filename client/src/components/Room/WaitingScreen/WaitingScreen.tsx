@@ -150,6 +150,15 @@ const WaitingScreen: React.FC<Props> = (props) => {
     </div>
   );
 
+  const forceStartButton = props.lobby.players &&
+    props.lobby.players.length > 1 && (
+      <div className={styles.settingsRow}>
+        <Button btnStyle={"warning"} onClick={() => onStartPress()}>
+          Force Start Game
+        </Button>
+      </div>
+    );
+
   return (
     props.me.hasSetName && (
       <div className={styles.container}>
@@ -163,6 +172,7 @@ const WaitingScreen: React.FC<Props> = (props) => {
               <div className={styles.label}>Lobby Settings:</div>
               {publicSwitch}
               {roundsElem}
+              {forceStartButton}
             </div>
           )}
           <div className={styles.userSettings}>
